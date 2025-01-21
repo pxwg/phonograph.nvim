@@ -86,8 +86,8 @@ end
 
 map("n", "<leader>nn", function()
   InsertPDFurl()
-end, { noremap = true, silent = true, desc = "New " })
+end, { noremap = true, silent = true, desc = "New note" })
 
-map("n", "<leader>rf", function()
+map("n", "<leader>nf", function()
   OpenPDFAndURL()
 end, { noremap = true, silent = true, desc = "Extract and print file info" })
