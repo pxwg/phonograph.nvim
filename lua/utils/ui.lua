@@ -18,16 +18,14 @@ local function InsertLinesAtTop(lines_to_insert, pos)
 
   local file = io.open(new_file_path, "r")
   local lines = {}
-  local found = false
+  local updated = false
 
   if file then
     for line in file:lines() do
       local row, col = line:match("{(%d+), (%d+),")
       if row and col and tonumber(row) == pos.row and tonumber(col) == pos.col then
-        found = true
-        for _, new_line in ipairs(lines_to_insert) do
-          table.insert(lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
-        end
+        -- Remove the matching line
+        updated = true
       else
         table.insert(lines, line)
       end
@@ -35,7 +33,13 @@ local function InsertLinesAtTop(lines_to_insert, pos)
     file:close()
   end
 
-  if not found then
+  if updated then
+    -- Insert new lines at the position of the removed line
+    for _, new_line in ipairs(lines_to_insert) do
+      table.insert(lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
+    end
+  else
+    -- Append new lines at the end if no existing line was updated
     for _, new_line in ipairs(lines_to_insert) do
       table.insert(lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
     end
@@ -45,6 +49,9 @@ local function InsertLinesAtTop(lines_to_insert, pos)
   if file then
     for _, line in ipairs(lines) do
       file:write(line)
+      if not line:match("\n$") then
+        file:write("\n")
+      end
     end
     file:close()
   else
