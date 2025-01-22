@@ -1,13 +1,14 @@
--- a note script for editing notes when using chorme
+-- a note script for editing notes when using chrome
 -- keymappings
 local map = vim.keymap.set
 
+---@return table {row: number, col: number}
 local function GetCursorPosition()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   return { row = row, col = col }
 end
 
--- record current url and pdf on first and second line to the specified file
+---@return string
 local function get_file_path()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
@@ -15,6 +16,8 @@ local function get_file_path()
   return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
 end
 
+---@param file_path string
+---@return table
 local function read_file(file_path)
   local file = io.open(file_path, "r")
   local lines = {}
@@ -27,6 +30,8 @@ local function read_file(file_path)
   return lines
 end
 
+---@param file_path string
+---@param lines table
 local function write_file(file_path, lines)
   local file = io.open(file_path, "w")
   if file then
@@ -42,6 +47,10 @@ local function write_file(file_path, lines)
   end
 end
 
+---@param lines table
+---@param lines_to_insert table
+---@param pos table {row: number, col: number}
+---@return table
 local function update_lines(lines, lines_to_insert, pos)
   local updated = false
   local new_lines = {}
@@ -71,6 +80,8 @@ local function update_lines(lines, lines_to_insert, pos)
   return new_lines
 end
 
+---@param lines_to_insert table
+---@param pos table {row: number, col: number}
 local function InsertLinesAtTop(lines_to_insert, pos)
   local file_path = get_file_path()
   vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
@@ -87,7 +98,7 @@ function InsertPDFurl()
   InsertLinesAtTop({ pdf, url }, pos)
 end
 
--- open the document in Skim and Chorme to the specified page
+---@return table|nil {path: string, page: number, scrollY: number, url: string} or nil
 local function ExtractAndPrintFileInfo()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
@@ -108,13 +119,13 @@ local function ExtractAndPrintFileInfo()
   local content = file:read("*all")
   file:close()
 
-  -- 提取信息
+  -- Extract information
   local path = content:match("path: ([^\n,]+)"):gsub("^%s+", ""):gsub("%s+$", "")
   local page = content:match("page: (%d+)")
   local scrollY = content:match("scrollY:(%d+)")
   local url = content:match("url:([^\n,]+)")
 
-  -- 输出表格
+  -- Output table
   if path and page and scrollY and url then
     print("path: " .. path)
     print("page: " .. page)
@@ -133,6 +144,57 @@ local function OpenPDFAndURL()
   end
 end
 
+--- Parses the file content and returns all paths from lines
+--- Only keeps the content matching 'xxx.pdf'
+---@param file_path string
+---@return table
+local function get_all_pdfs(file_path)
+  local file = io.open(file_path, "r")
+  if not file then
+    print("Error: Unable to open file " .. file_path)
+    return {}
+  end
+
+  local paths = {}
+  for line in file:lines() do
+    if line:match("page:") then
+      local path = line:match("path: ([^,]+)")
+      if path then
+        -- Extract the part matching 'xxx.pdf'
+        local extracted_path = path:match(".+/([^/]+%.pdf)}")
+        if extracted_path then
+          table.insert(paths, extracted_path)
+        end
+      end
+    end
+  end
+
+  file:close()
+  return paths
+end
+
+--- Parses the file content and returns all titles from lines containing 'title'
+---@param file_path string
+---@return table
+local function get_all_titles(file_path)
+  local file = io.open(file_path, "r")
+  if not file then
+    print("Error: Unable to open file " .. file_path)
+    return {}
+  end
+
+  local titles = {}
+  for line in file:lines() do
+    local title = line:match("title:([^,]+)")
+    if title then
+      table.insert(titles, title)
+    end
+  end
+
+  file:close()
+  return titles
+end
+
 map("n", "<leader>nn", function()
   InsertPDFurl()
 end, { noremap = true, silent = true, desc = "New note" })
@@ -140,3 +202,19 @@ end, { noremap = true, silent = true, desc = "New note" })
 map("n", "<leader>nf", function()
   OpenPDFAndURL()
 end, { noremap = true, silent = true, desc = "Extract and print file info" })
+
+map("n", "<leader>np", function()
+  local file_path = get_file_path()
+  local pdfs = get_all_pdfs(file_path)
+  for _, pdf in ipairs(pdfs) do
+    print(pdf)
+  end
+end, { noremap = true, silent = true, desc = "Extract and print pdfs" })
+
+map("n", "<leader>nu", function()
+  local file_path = get_file_path()
+  local urls = get_all_titles(file_path)
+  for _, url in ipairs(urls) do
+    print(url)
+  end
+end, { noremap = true, silent = true, desc = "Extract and print urls" })
