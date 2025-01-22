@@ -8,44 +8,27 @@ local function GetCursorPosition()
 end
 
 -- record current url and pdf on first and second line to the specified file
-local function InsertLinesAtTop(lines_to_insert, pos)
+local function get_file_path()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
   file_path = file_path:gsub("^%s+", ""):gsub("%s+$", "")
-  local new_file_path = vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
+  return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
+end
 
-  vim.fn.mkdir(vim.fn.fnamemodify(new_file_path, ":h"), "p")
-
-  local file = io.open(new_file_path, "r")
+local function read_file(file_path)
+  local file = io.open(file_path, "r")
   local lines = {}
-  local updated = false
-
   if file then
     for line in file:lines() do
-      local row, col = line:match("{(%d+), (%d+),")
-      if row and col and tonumber(row) == pos.row and tonumber(col) == pos.col then
-        -- Remove the matching line
-        updated = true
-      else
-        table.insert(lines, line)
-      end
+      table.insert(lines, line)
     end
     file:close()
   end
+  return lines
+end
 
-  if updated then
-    -- Insert new lines at the position of the removed line
-    for _, new_line in ipairs(lines_to_insert) do
-      table.insert(lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
-    end
-  else
-    -- Append new lines at the end if no existing line was updated
-    for _, new_line in ipairs(lines_to_insert) do
-      table.insert(lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
-    end
-  end
-
-  file = io.open(new_file_path, "w")
+local function write_file(file_path, lines)
+  local file = io.open(file_path, "w")
   if file then
     for _, line in ipairs(lines) do
       file:write(line)
@@ -55,8 +38,46 @@ local function InsertLinesAtTop(lines_to_insert, pos)
     end
     file:close()
   else
-    print("Error: Unable to create file " .. new_file_path)
+    print("Error: Unable to create file " .. file_path)
   end
+end
+
+local function update_lines(lines, lines_to_insert, pos)
+  local updated = false
+  local new_lines = {}
+
+  for _, line in ipairs(lines) do
+    local row, col = line:match("{(%d+), (%d+),")
+    if row and col and tonumber(row) == pos.row and tonumber(col) == pos.col then
+      -- Remove the matching line and insert new lines
+      updated = true
+    else
+      table.insert(new_lines, line)
+    end
+  end
+
+  if updated then
+    -- Insert new lines at the position of the removed line
+    for _, new_line in ipairs(lines_to_insert) do
+      table.insert(new_lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
+    end
+  else
+    -- Append new lines at the end if no existing line was updated
+    for _, new_line in ipairs(lines_to_insert) do
+      table.insert(new_lines, string.format("{%d, %d, %s}\n", pos.row, pos.col, new_line))
+    end
+  end
+
+  return new_lines
+end
+
+local function InsertLinesAtTop(lines_to_insert, pos)
+  local file_path = get_file_path()
+  vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
+
+  local lines = read_file(file_path)
+  local updated_lines = update_lines(lines, lines_to_insert, pos)
+  write_file(file_path, updated_lines)
 end
 
 function InsertPDFurl()
