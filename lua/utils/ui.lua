@@ -2,25 +2,24 @@
 -- keymappings
 local map = vim.keymap.set
 
+local function GetCursorPosition()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return { row = row, col = col }
+end
+
 -- record current url and pdf on first and second line to the specified file
-local function InsertLinesAtTop(lines_to_insert)
-  -- 获取当前缓冲区的文件路径
+local function InsertLinesAtTop(lines_to_insert, pos)
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
   file_path = file_path:gsub("^%s+", ""):gsub("%s+$", "")
-  -- 构建新文件的路径
   local new_file_path = vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
-  print(new_file_path)
 
-  -- 确保目录存在
   vim.fn.mkdir(vim.fn.fnamemodify(new_file_path, ":h"), "p")
 
-  -- 新建文件进行写入（覆盖插入）
-  local file = io.open(new_file_path, "w")
+  local file = io.open(new_file_path, "a") -- 使用 "a" 模式以追加内容而不是覆盖
   if file then
-    -- 逐行写入lines_to_insert
     for _, line in ipairs(lines_to_insert) do
-      file:write(line .. "\n")
+      file:write(string.format("{%d, %d, %s}\n", pos.row, pos.col, line))
     end
     file:close()
   else
@@ -29,27 +28,24 @@ local function InsertLinesAtTop(lines_to_insert)
 end
 
 function InsertPDFurl()
+  local pos = GetCursorPosition()
   local url = ReturnChormeReadingState()
   local pdf = ReturnSkimReadingState()
-  InsertLinesAtTop({ pdf, url })
+  InsertLinesAtTop({ pdf, url }, pos)
 end
 
 -- open the document in Skim and Chorme to the specified page
 local function ExtractAndPrintFileInfo()
-  -- 获取当前缓冲区的文件路径
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
 
-  -- 构建要查找的文件路径
   local new_file_path = vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
 
-  -- 检查文件是否存在
   if vim.fn.filereadable(new_file_path) == 0 then
     print("Error: File does not exist " .. new_file_path)
     return
   end
 
-  -- 读取文件内容
   local file = io.open(new_file_path, "r")
   if not file then
     print("Error: Unable to open file " .. new_file_path)
