@@ -1,15 +1,18 @@
--- getting and remenbering the history of pdfs and urls
+-- getting and remembering the history of pdfs and urls
 -- keymappings
 local map = vim.keymap.set
+local api = require("utils.api")
+
+local M = {}
 
 ---@return table {row: number, col: number}
-local function GetCursorPosition()
+function M.GetCursorPosition()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   return { row = row, col = col }
 end
 
 ---@return string
-local function get_file_path()
+function M.get_file_path()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
   file_path = file_path:gsub("^%s+", ""):gsub("%s+$", "")
@@ -18,7 +21,7 @@ end
 
 ---@param file_path string
 ---@return table
-local function read_file(file_path)
+function M.read_file(file_path)
   local file = io.open(file_path, "r")
   local lines = {}
   if file then
@@ -32,7 +35,7 @@ end
 
 ---@param file_path string
 ---@param lines table
-local function write_file(file_path, lines)
+function M.write_file(file_path, lines)
   local file = io.open(file_path, "w")
   if file then
     for _, line in ipairs(lines) do
@@ -51,7 +54,7 @@ end
 ---@param lines_to_insert table
 ---@param pos table {row: number, col: number}
 ---@return table
-local function update_lines(lines, lines_to_insert, pos)
+function M.update_lines(lines, lines_to_insert, pos)
   local updated = false
   local new_lines = {}
 
@@ -82,24 +85,24 @@ end
 
 ---@param lines_to_insert table
 ---@param pos table {row: number, col: number}
-local function InsertLinesAtTop(lines_to_insert, pos)
-  local file_path = get_file_path()
+function M.InsertLinesAtTop(lines_to_insert, pos)
+  local file_path = M.get_file_path()
   vim.fn.mkdir(vim.fn.fnamemodify(file_path, ":h"), "p")
 
-  local lines = read_file(file_path)
-  local updated_lines = update_lines(lines, lines_to_insert, pos)
-  write_file(file_path, updated_lines)
+  local lines = M.read_file(file_path)
+  local updated_lines = M.update_lines(lines, lines_to_insert, pos)
+  M.write_file(file_path, updated_lines)
 end
 
-function InsertPDFurl()
-  local pos = GetCursorPosition()
-  local url = ReturnChormeReadingState()
-  local pdf = ReturnSkimReadingState()
-  InsertLinesAtTop({ pdf, url }, pos)
+function M.InsertPDFurl()
+  local pos = M.GetCursorPosition()
+  local url = api.ReturnChormeReadingState()
+  local pdf = api.ReturnSkimReadingState()
+  M.InsertLinesAtTop({ pdf, url }, pos)
 end
 
 ---@return table|nil {path: string, page: number, scrollY: number, url: string} or nil
-local function ExtractAndPrintFileInfo()
+function M.ExtractAndPrintFileInfo()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
 
@@ -136,11 +139,11 @@ local function ExtractAndPrintFileInfo()
   end
 end
 
-local function OpenPDFAndURL()
-  local info = ExtractAndPrintFileInfo()
+function M.OpenPDFAndURL()
+  local info = M.ExtractAndPrintFileInfo()
   if info then
-    OpenSkimToReadingState(info[2], info[1])
-    OpenUntilReady(info[4], info[3])
+    api.OpenSkimToReadingState(info[2], info[1])
+    api.OpenUntilReady(info[4], info[3])
   end
 end
 
@@ -148,7 +151,7 @@ end
 --- Only keeps the content matching 'xxx.pdf'
 ---@param file_path string
 ---@return table
-local function get_all_pdfs(file_path)
+function M.get_all_pdfs(file_path)
   local file = io.open(file_path, "r")
   if not file then
     print("Error: Unable to open file " .. file_path)
@@ -177,7 +180,7 @@ end
 --- Parses the file content and returns all titles from lines containing 'title'
 ---@param file_path string
 ---@return table
-local function get_all_titles(file_path)
+function M.get_all_titles(file_path)
   local file = io.open(file_path, "r")
   if not file then
     print("Error: Unable to open file " .. file_path)
@@ -200,11 +203,11 @@ end
 -----keymap for debugging and testing---------
 
 map("n", "<leader>nn", function()
-  InsertPDFurl()
+  M.InsertPDFurl()
 end, { noremap = true, silent = true, desc = "New note" })
 
 map("n", "<leader>nf", function()
-  OpenPDFAndURL()
+  M.OpenPDFAndURL()
 end, { noremap = true, silent = true, desc = "Extract and print file info" })
 
 local function print_table(pdfs)
@@ -214,13 +217,15 @@ local function print_table(pdfs)
 end
 
 map("n", "<leader>np", function()
-  local file_path = get_file_path()
-  local pdfs = get_all_pdfs(file_path)
+  local file_path = M.get_file_path()
+  local pdfs = M.get_all_pdfs(file_path)
   print_table(pdfs)
 end, { noremap = true, silent = true, desc = "Extract and print pdfs" })
 
 map("n", "<leader>nu", function()
-  local file_path = get_file_path()
-  local urls = get_all_titles(file_path)
+  local file_path = M.get_file_path()
+  local urls = M.get_all_titles(file_path)
   print_table(urls)
 end, { noremap = true, silent = true, desc = "Extract and print urls" })
+
+return M

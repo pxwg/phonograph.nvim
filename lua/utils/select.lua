@@ -1,11 +1,13 @@
 -- fast select
 
+local M = {}
+
 --- Generates an index table based on the input table
 --- @param tbl table The input table with elements { "pdf", num, extracted_path }
 --- @return number[] The index table
-function GenerateIndex(tbl)
+function M.GenerateIndex(tbl)
   local indices = {}
-  for i, entry in ipairs(tbl) do
+  for _, entry in ipairs(tbl) do
     table.insert(indices, entry[2]) -- Use the num value as the index
   end
   return indices
@@ -16,7 +18,7 @@ end
 --- @param tbl table The table to be sorted
 --- @param x number The reference number to calculate distance
 --- @return table The sorted table
-function SortTablebyDistance(indices, tbl, x)
+function M.SortTablebyDistance(indices, tbl, x)
   -- Create a table of {index, value} pairs
   local indexed_tbl = {}
   for i, idx in ipairs(indices) do
@@ -37,7 +39,9 @@ function SortTablebyDistance(indices, tbl, x)
   return sorted_tbl
 end
 
--- -- Example usage
+return M
+
+---- Example usage ------
 -- local function get_all_pdfs(file_path)
 --   local file = io.open(file_path, "r")
 --   if not file then
