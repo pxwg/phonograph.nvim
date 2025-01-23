@@ -1,7 +1,5 @@
--- a note script apis to manage notes from chorme and other sources
-
--- record the reading state of the current tab in Chrome
--- @return string
+--- Get the reading state of the current tab in Chrome
+--- @return string|nil
 function ReturnChormeReadingState()
   local script = [[
         tell application "Google Chrome"
@@ -22,8 +20,8 @@ function ReturnChormeReadingState()
   end
 end
 
--- record the reading state of the current tab in Skim
--- @return string
+--- Get the reading state of the current tab in Skim
+--- @return string|nil
 function ReturnSkimReadingState()
   local script = [[
         tell application "Skim"
@@ -44,8 +42,9 @@ function ReturnSkimReadingState()
   end
 end
 
--- open the document in Skim to the specified page
--- @param state string
+--- Open the document in Skim to the specified page
+--- @param page number
+--- @param path string
 function OpenSkimToReadingState(page, path)
   local script = string.format(
     [[
@@ -67,8 +66,9 @@ function OpenSkimToReadingState(page, path)
   end
 end
 
--- go to the url and scroll to the position when the page is loaded
--- @param url string
+--- Go to the URL and scroll to the position when the page is loaded
+--- @param url string
+--- @param scrollY number
 function OpenUntilReady(url, scrollY)
   url = url:gsub("%s+", "")
   scrollY = scrollY or 0
