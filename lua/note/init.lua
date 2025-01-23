@@ -2,7 +2,7 @@ local M = {}
 
 function M.setup()
   require("utils.api")
-  require("utils.ui")
+  require("utils.rem")
 end
 
 return M
