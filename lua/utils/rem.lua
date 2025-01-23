@@ -162,12 +162,13 @@ function M.get_all_pdfs(file_path)
   for line in file:lines() do
     if line:match("page:") then
       local path = line:match("path: ([^,]+)")
+      local page = line:match("page: (%d+)")
       local num = line:match("{(%d+),")
       if path and num then
         -- Extract the part matching 'xxx.pdf'
         local extracted_path = path:match(".+/([^/]+%.pdf)}")
         if extracted_path then
-          table.insert(paths, { "pdf", num, extracted_path })
+          table.insert(paths, { "pdf", num, extracted_path, page })
         end
       end
     end
@@ -190,9 +191,10 @@ function M.get_all_titles(file_path)
   local titles = {}
   for line in file:lines() do
     local title = line:match("title:([^,]+)")
+    local scrollY = line:match("scrollY:(%d+)")
     local num = line:match("{(%d+),")
     if title then
-      table.insert(titles, { "url", num, title })
+      table.insert(titles, { "url", num, title, scrollY })
     end
   end
 
@@ -212,7 +214,7 @@ end, { noremap = true, silent = true, desc = "Extract and print file info" })
 
 local function print_table(pdfs)
   for _, entry in ipairs(pdfs) do
-    print(string.format('{"%s", %s, "%s"}', entry[1], entry[2], entry[3]))
+    print(string.format('{"%s", %s, "%s", "%s"}', entry[1], entry[2], entry[3], entry[4]))
   end
 end
 
