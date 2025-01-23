@@ -5,12 +5,6 @@ local api = require("utils.api")
 
 local M = {}
 
----@return table {row: number, col: number}
-function M.GetCursorPosition()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return { row = row, col = col }
-end
-
 ---@return string
 function M.get_file_path()
   local buf = vim.api.nvim_get_current_buf()
@@ -95,7 +89,7 @@ function M.InsertLinesAtTop(lines_to_insert, pos)
 end
 
 function M.InsertPDFurl()
-  local pos = M.GetCursorPosition()
+  local pos = vim.api.nvim_win_get_cursor(0)
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
   M.InsertLinesAtTop({ pdf, url }, pos)
@@ -161,14 +155,14 @@ function M.get_all_pdfs(file_path)
   local paths = {}
   for line in file:lines() do
     if line:match("page:") then
-      local path = line:match("path: ([^,]+)")
+      local path = line:match("path: ([^,]+)}")
       local page = line:match("page: (%d+)")
       local num = line:match("{(%d+),")
       if path and num then
         -- Extract the part matching 'xxx.pdf'
-        local extracted_path = path:match(".+/([^/]+%.pdf)}")
+        local extracted_path = path:match(".+/([^/]+%.pdf)")
         if extracted_path then
-          table.insert(paths, { "pdf", num, extracted_path, page })
+          table.insert(paths, { "pdf", num, extracted_path, page, path })
         end
       end
     end
@@ -191,10 +185,11 @@ function M.get_all_titles(file_path)
   local titles = {}
   for line in file:lines() do
     local title = line:match("title:([^,]+)")
+    local url = line:match("url:([^\n,]+)}")
     local scrollY = line:match("scrollY:(%d+)")
     local num = line:match("{(%d+),")
     if title then
-      table.insert(titles, { "url", num, title, scrollY })
+      table.insert(titles, { "url", num, title, scrollY, url })
     end
   end
 
@@ -202,32 +197,28 @@ function M.get_all_titles(file_path)
   return titles
 end
 
------keymap for debugging and testing---------
-
-map("n", "<leader>nn", function()
-  M.InsertPDFurl()
-end, { noremap = true, silent = true, desc = "New note" })
-
-map("n", "<leader>nf", function()
-  M.OpenPDFAndURL()
-end, { noremap = true, silent = true, desc = "Extract and print file info" })
-
-local function print_table(pdfs)
-  for _, entry in ipairs(pdfs) do
-    print(string.format('{"%s", %s, "%s", "%s"}', entry[1], entry[2], entry[3], entry[4]))
-  end
-end
-
-map("n", "<leader>np", function()
-  local file_path = M.get_file_path()
-  local pdfs = M.get_all_pdfs(file_path)
-  print_table(pdfs)
-end, { noremap = true, silent = true, desc = "Extract and print pdfs" })
-
-map("n", "<leader>nu", function()
-  local file_path = M.get_file_path()
-  local urls = M.get_all_titles(file_path)
-  print_table(urls)
-end, { noremap = true, silent = true, desc = "Extract and print urls" })
+-- -----keymap for debugging and testing---------
+--
+-- map("n", "<leader>nf", function()
+--   M.OpenPDFAndURL()
+-- end, { noremap = true, silent = true, desc = "Extract and print file info" })
+--
+-- local function print_table(pdfs)
+--   for _, entry in ipairs(pdfs) do
+--     print(string.format('{"%s", %s, "%s", "%s"}', entry[1], entry[2], entry[3], entry[4]))
+--   end
+-- end
+--
+-- map("n", "<leader>np", function()
+--   local file_path = M.get_file_path()
+--   local pdfs = M.get_all_pdfs(file_path)
+--   print_table(pdfs)
+-- end, { noremap = true, silent = true, desc = "Extract and print pdfs" })
+--
+-- map("n", "<leader>nu", function()
+--   local file_path = M.get_file_path()
+--   local urls = M.get_all_titles(file_path)
+--   print_table(urls)
+-- end, { noremap = true, silent = true, desc = "Extract and print urls" })
 
 return M
