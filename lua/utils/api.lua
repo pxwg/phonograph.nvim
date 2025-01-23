@@ -1,6 +1,8 @@
+local M = {}
+
 --- Get the reading state of the current tab in Chrome
 --- @return string|nil
-function ReturnChormeReadingState()
+function M.ReturnChormeReadingState()
   local script = [[
         tell application "Google Chrome"
             set currentTab to active tab of front window
@@ -22,7 +24,7 @@ end
 
 --- Get the reading state of the current tab in Skim
 --- @return string|nil
-function ReturnSkimReadingState()
+function M.ReturnSkimReadingState()
   local script = [[
         tell application "Skim"
             set currentDocument to front document
@@ -45,7 +47,7 @@ end
 --- Open the document in Skim to the specified page
 --- @param page number
 --- @param path string
-function OpenSkimToReadingState(page, path)
+function M.OpenSkimToReadingState(page, path)
   local script = string.format(
     [[
         tell application "Skim"
@@ -69,7 +71,7 @@ end
 --- Go to the URL and scroll to the position when the page is loaded
 --- @param url string
 --- @param scrollY number
-function OpenUntilReady(url, scrollY)
+function M.OpenUntilReady(url, scrollY)
   url = url:gsub("%s+", "")
   scrollY = scrollY or 0
 
@@ -107,3 +109,5 @@ function OpenUntilReady(url, scrollY)
     handle:close()
   end)
 end
+
+return M
