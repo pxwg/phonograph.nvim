@@ -1,3 +1,5 @@
+-- api sources for obtaining the reading state of the current tab in Chrome and Skim, and opening the document in Skim to the specified page.
+
 local M = {}
 
 --- Get the reading state of the current tab in Chrome
