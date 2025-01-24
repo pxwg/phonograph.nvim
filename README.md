@@ -1,4 +1,4 @@
-# *note.nvim*: Take Notes Anytime with Neovim
+# *note.nvim*: Take Notes Everywhere with Neovim
 
 ## Introduction
 
@@ -14,12 +14,13 @@ The purpose of this plugin is to achieve this functionality. Currently, it suppo
 ## Installation
 
 > lazy.nvim
+
 ```lua
 return {
   "pxwg/note.nvim",
   dependencies = {
     "MunifTanjim/nui.nvim",
-    { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview  },
+    { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview
   branch = "feature", -- Optional. The latest (unstable) version would be updated in this branch
 }
 ```
