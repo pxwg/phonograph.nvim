@@ -4,7 +4,6 @@ local api = require("utils.api")
 
 local Layout = require("nui.layout")
 local Popup = require("nui.popup")
-local event = require("nui.utils.autocmd").event
 local keymap = vim.keymap
 
 local icons = require("icons").icons
@@ -84,12 +83,11 @@ local function attach_events(main_popup, layout, current_table, detail_popup, up
   })
 end
 
---- TODO: transfer the updated table to outside
 --- Set key mappings for the main popup
 ---@param main_popup table The main popup window
 ---@param detail_popup table The detail popup window
 ---@param layout table The layout containing the popups
----@param tables table The other table to switch to
+---@param tables table The list of tables to switch between
 ---@param _update_main_popup function The function to update the main popup
 ---@param _update_detail_popup function The function to update the detail popup
 ---@param _attach_events function The function to attach events to the popup
@@ -102,22 +100,23 @@ local function set_keymaps(
   _update_detail_popup,
   _attach_events
 )
-  keymap.set("n", "l", function()
-    tables.current, tables.other = tables.other, tables.current
-    _update_main_popup(tables.current, main_popup)
+  local current_index = 1
+
+  local function switch_table(direction)
+    current_index = (current_index - 1 + direction + #tables) % #tables + 1
+    _update_main_popup(tables[current_index], main_popup)
     vim.schedule(function()
       vim.api.nvim_set_current_win(main_popup.winid)
-      _attach_events(main_popup, layout, tables.current, detail_popup, _update_detail_popup)
+      _attach_events(main_popup, layout, tables[current_index], detail_popup, _update_detail_popup)
     end)
+  end
+
+  keymap.set("n", "l", function()
+    switch_table(1)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "h", function()
-    tables.current, tables.other = tables.other, tables.current
-    _update_main_popup(tables.current, main_popup)
-    vim.schedule(function()
-      vim.api.nvim_set_current_win(main_popup.winid)
-      _attach_events(main_popup, layout, tables.current, detail_popup, _update_detail_popup)
-    end)
+    switch_table(-1)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "j", "j", { noremap = true, silent = true, buffer = main_popup.bufnr })
@@ -130,21 +129,32 @@ local function set_keymaps(
 
   keymap.set("n", "<CR>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
-    if get_type(tables.current) == "pdf" then
-      api.OpenSkimToReadingState(tables.current[row][4], tables.current[row][5])
+    if get_type(tables[current_index]) == "pdf" then
+      api.OpenSkimToReadingState(tables[current_index][row][4], tables[current_index][row][5])
     else
-      api.OpenUntilReady(tables.current[row][5], tables.current[row][4])
+      api.OpenUntilReady(tables[current_index][row][5], tables[current_index][row][4])
     end
     layout:unmount()
   end, { noremap = true, silent = true })
 end
 
 --- Create the selection window with the given tables
----@param table1 table The first table containing the data
----@param table2 table The second table containing the data
-function M.create_selection_window(table1, table2)
-  local current_table = table1
-  local other_table = table2
+---@param ... table The tables containing the data
+function M.create_selection_window(...)
+  local tables = { ... }
+
+  -- Filter out empty tables
+  local non_empty_tables = {}
+  for _, tbl in ipairs(tables) do
+    if #tbl > 0 then
+      table.insert(non_empty_tables, tbl)
+    end
+  end
+
+  if #non_empty_tables == 0 then
+    print("No data to show")
+    return
+  end
 
   -- Create the main popup window
   local main_popup = Popup({
@@ -221,10 +231,9 @@ function M.create_selection_window(table1, table2)
   print("Main window ID: " .. main_winid)
   print("Detail window ID: " .. detail_winid)
 
-  local tables = { current = current_table, other = other_table }
-  update_main_popup(current_table, main_popup)
-  attach_events(main_popup, layout, current_table, detail_popup, update_detail_popup)
-  set_keymaps(main_popup, detail_popup, layout, tables, update_main_popup, update_detail_popup, attach_events)
+  update_main_popup(non_empty_tables[1], main_popup)
+  attach_events(main_popup, layout, non_empty_tables[1], detail_popup, update_detail_popup)
+  set_keymaps(main_popup, detail_popup, layout, non_empty_tables, update_main_popup, update_detail_popup, attach_events)
 end
 
 return M
