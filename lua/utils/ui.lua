@@ -13,14 +13,14 @@ local icons = {
 }
 
 --- Get the type of the table
---- @param table table The table containing the data
+--- @param table table
 --- @return string The type of the table
 local function get_type(table)
-  if table and table[1] then
-    return table[1][2]
-  else
-    return "empty"
+  while type(table) == "table" and table[1] ~= nil do
+    table = table[1]
   end
+  local result = table
+  return tostring(result)
 end
 
 --- Get the icon for the table
