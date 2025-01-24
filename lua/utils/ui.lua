@@ -26,6 +26,10 @@ end
 ---@param detail_popup table The detail popup window
 ---@param row number The selected row index
 local function update_detail_popup(current_table, detail_popup, row)
+  local image_loaded, _ = pcall(require, "image")
+  if not image_loaded then
+    print("image.nvim not loaded")
+  end
   local item = current_table[row]
   if item then
     local content = {}
