@@ -10,3 +10,16 @@ The advantage of taking notes in Neovim lies in its speed and unparalleled custo
 * Restore the reading state while reopening Neovim
 
 The purpose of this plugin is to achieve this functionality. Currently, it supports the `chrome` browser and the `skim` reader (as these are the two readers I use), and it relies on (applescript) in the MacOS environment. We look forward to supporting more platforms and software in the future.
+
+## Installation
+
+> lazy.nvim
+```lua
+return {
+  "pxwg/note.nvim",
+  dependencies = {
+    "MunifTanjim/nui.nvim",
+    { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview  },
+  branch = "feature", -- Optional. The latest (unstable) version would be updated in this branch
+}
+```
