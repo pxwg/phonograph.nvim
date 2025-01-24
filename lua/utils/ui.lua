@@ -7,34 +7,16 @@ local Popup = require("nui.popup")
 local event = require("nui.utils.autocmd").event
 local keymap = vim.keymap
 
-local icons = {
-  pdf = " ",
-  url = "󰖟 ",
-}
-
---- Get the type of the table
---- @param table table
---- @return string The type of the table
-local function get_type(table)
-  while type(table) == "table" and table[1] ~= nil do
-    table = table[1]
-  end
-  local result = table
-  return tostring(result)
-end
+local icons = require("icons").icons
+local get_type = require("icons").get_type
 
 --- Get the icon for the table
 --- @param table table The table containing the data
 --- @return string The icon for the table
 local function icon_with_type(table)
-  if table then
-    if get_type(table) == "pdf" then
-      return icons.pdf
-    elseif get_type(table) == "url" then
-      return icons.url
-    else
-      return "󰟢"
-    end
+  local icon = icons[get_type(table)]
+  if icon then
+    return icon
   else
     return "󰟢"
   end
