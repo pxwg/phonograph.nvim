@@ -1,4 +1,4 @@
-# **note.nvim** 随时使用 Neovim 编写笔记
+# *note.nvim*: 随时使用 Neovim 编写笔记
 
 ## Introduction
 
