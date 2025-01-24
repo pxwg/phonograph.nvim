@@ -1,4 +1,4 @@
-# **note.nvim** Writing Notes With Neovim Everywhere
+# *note.nvim* Writing Notes With Neovim Everywhere
 
 [中文](./readme/zh_cn.md)
 
