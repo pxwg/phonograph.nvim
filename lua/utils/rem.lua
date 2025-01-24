@@ -90,6 +90,7 @@ end
 
 function M.InsertPDFurl()
   local pos = vim.api.nvim_win_get_cursor(0)
+  pos = { row = pos[1], col = pos[2] }
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
   M.InsertLinesAtTop({ pdf, url }, pos)
