@@ -55,58 +55,17 @@ local function update_main_popup(current_table, main_popup)
   end)
 end
 
---- Set key mappings for the main popup
----@param main_popup table The main popup window
----@param layout table The layout containing the popups
----@param current_table table The current table containing the data
----@param other_table table The other table to switch to
----@param update_main_popup function The function to update the main popup
-local function set_keymaps(main_popup, layout, current_table, other_table, update_main_popup)
-  keymap.set("n", "l", function()
-    current_table, other_table = other_table, current_table
-    update_main_popup(current_table, main_popup, icons)
-    vim.schedule(function()
-      vim.api.nvim_set_current_win(main_popup.winid)
-    end)
-  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
-
-  keymap.set("n", "h", function()
-    current_table, other_table = other_table, current_table
-    update_main_popup(current_table, main_popup, icons)
-    vim.schedule(function()
-      vim.api.nvim_set_current_win(main_popup.winid)
-    end)
-  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
-
-  keymap.set("n", "j", "j", { noremap = true, silent = true, buffer = main_popup.bufnr })
-
-  keymap.set("n", "k", "k", { noremap = true, silent = true, buffer = main_popup.bufnr })
-
-  keymap.set("n", "q", function()
-    layout:unmount()
-  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
-
-  keymap.set("n", "<CR>", function()
-    local row = vim.api.nvim_win_get_cursor(0)[1]
-    if get_type(current_table) == "pdf" then
-      api.OpenSkimToReadingState(current_table[row][4], current_table[row][5])
-    else
-      api.OpenUntilReady(current_table[row][5], current_table[row][4])
-    end
-    layout:unmount()
-  end, { noremap = true, silent = true })
-end
-
 --- Attach events to the main popup
 ---@param main_popup table The main popup window
 ---@param layout table The layout containing the popups
 ---@param current_table table The current table containing the data
 ---@param detail_popup table The detail popup window
-local function attach_events(main_popup, layout, current_table, detail_popup)
+---@param update_detail_popup_fn function The function to update the detail popup
+local function attach_events(main_popup, layout, current_table, detail_popup, update_detail_popup_fn)
   vim.api.nvim_buf_attach(main_popup.bufnr, false, {
     on_lines = function()
       local row = vim.api.nvim_win_get_cursor(0)[1]
-      update_detail_popup(current_table, detail_popup, row)
+      update_detail_popup_fn(current_table, detail_popup, row)
       vim.schedule(function()
         vim.api.nvim_set_current_win(main_popup.winid)
       end)
@@ -120,9 +79,64 @@ local function attach_events(main_popup, layout, current_table, detail_popup)
     buffer = main_popup.bufnr,
     callback = function()
       local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1]
-      update_detail_popup(current_table, detail_popup, row)
+      update_detail_popup_fn(current_table, detail_popup, row)
     end,
   })
+end
+
+--- TODO: transfer the updated table to outside
+--- Set key mappings for the main popup
+---@param main_popup table The main popup window
+---@param detail_popup table The detail popup window
+---@param layout table The layout containing the popups
+---@param tables table The other table to switch to
+---@param _update_main_popup function The function to update the main popup
+---@param _update_detail_popup function The function to update the detail popup
+---@param _attach_events function The function to attach events to the popup
+local function set_keymaps(
+  main_popup,
+  detail_popup,
+  layout,
+  tables,
+  _update_main_popup,
+  _update_detail_popup,
+  _attach_events
+)
+  keymap.set("n", "l", function()
+    tables.current, tables.other = tables.other, tables.current
+    _update_main_popup(tables.current, main_popup)
+    vim.schedule(function()
+      vim.api.nvim_set_current_win(main_popup.winid)
+      _attach_events(main_popup, layout, tables.current, detail_popup, _update_detail_popup)
+    end)
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
+
+  keymap.set("n", "h", function()
+    tables.current, tables.other = tables.other, tables.current
+    _update_main_popup(tables.current, main_popup)
+    vim.schedule(function()
+      vim.api.nvim_set_current_win(main_popup.winid)
+      _attach_events(main_popup, layout, tables.current, detail_popup, _update_detail_popup)
+    end)
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
+
+  keymap.set("n", "j", "j", { noremap = true, silent = true, buffer = main_popup.bufnr })
+
+  keymap.set("n", "k", "k", { noremap = true, silent = true, buffer = main_popup.bufnr })
+
+  keymap.set("n", "q", function()
+    layout:unmount()
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
+
+  keymap.set("n", "<CR>", function()
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    if get_type(tables.current) == "pdf" then
+      api.OpenSkimToReadingState(tables.current[row][4], tables.current[row][5])
+    else
+      api.OpenUntilReady(tables.current[row][5], tables.current[row][4])
+    end
+    layout:unmount()
+  end, { noremap = true, silent = true })
 end
 
 --- Create the selection window with the given tables
@@ -207,9 +221,10 @@ function M.create_selection_window(table1, table2)
   print("Main window ID: " .. main_winid)
   print("Detail window ID: " .. detail_winid)
 
+  local tables = { current = current_table, other = other_table }
   update_main_popup(current_table, main_popup)
-  set_keymaps(main_popup, layout, current_table, other_table, update_main_popup)
-  attach_events(main_popup, layout, current_table, detail_popup)
+  attach_events(main_popup, layout, current_table, detail_popup, update_detail_popup)
+  set_keymaps(main_popup, detail_popup, layout, tables, update_main_popup, update_detail_popup, attach_events)
 end
 
 return M
