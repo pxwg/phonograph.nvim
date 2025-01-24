@@ -12,8 +12,22 @@ local icons = {
   url = "󰖟 ",
 }
 
-local function type(table)
+--- Get the type of the table
+--- @param table table The table containing the data
+--- @return string The type of the table
+local function get_type(table)
   return table[1][1]
+end
+
+--- Get the icon for the table
+--- @param table table The table containing the data
+--- @return string The icon for the table
+local function icon_with_type(table)
+  if get_type(table) == "pdf" then
+    return icons.pdf
+  else
+    return icons.url
+  end
 end
 
 --- Update the detail popup with the selected row's content
@@ -38,15 +52,8 @@ end
 ---@param main_popup table The main popup window
 local function update_main_popup(current_table, main_popup)
   local content = {}
-  local icon = function(item)
-    if type(item) == "pdf" then
-      return icons.pdf
-    else
-      return icons.url
-    end
-  end
   for _, item in ipairs(current_table) do
-    table.insert(content, icon(current_table) .. item[3])
+    table.insert(content, icon_with_type(current_table) .. item[3])
   end
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(main_popup.bufnr, 0, -1, false, content)
@@ -87,7 +94,7 @@ local function set_keymaps(main_popup, layout, current_table, other_table, updat
 
   keymap.set("n", "<CR>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
-    if type(current_table) == "pdf" then
+    if get_type(current_table) == "pdf" then
       api.OpenSkimToReadingState(current_table[row][4], current_table[row][5])
     else
       api.OpenUntilReady(current_table[row][5], current_table[row][4])
