@@ -8,8 +8,8 @@ local event = require("nui.utils.autocmd").event
 local keymap = vim.keymap
 
 local icons = {
-  pdf = "",
-  url = "󰖟",
+  pdf = " ",
+  url = "󰖟 ",
 }
 
 --- Get the type of the table
@@ -69,7 +69,7 @@ local function update_main_popup(current_table, main_popup)
     vim.api.nvim_buf_set_lines(main_popup.bufnr, 0, -1, false, content)
     local icon = icon_with_type(current_table)
     local width = vim.fn.strlen(icon)
-    vim.api.nvim_win_set_cursor(main_popup.winid, { 1, width + 1 }) -- Set cursor position to the first row and second column
+    vim.api.nvim_win_set_cursor(main_popup.winid, { 1, width }) -- Set cursor position to the first row and second column
   end)
 end
 
