@@ -1,6 +1,7 @@
 -- ui module for show the history of urls and pdfs
 local M = {}
 local api = require("utils.api")
+local pdf_preview = require("preview.pdf")
 
 local Layout = require("nui.layout")
 local Popup = require("nui.popup")
@@ -21,14 +22,19 @@ local function icon_with_type(table)
   end
 end
 
---- Update the detail popup with the selected row's content
----@param current_table table The current table containing the data
----@param detail_popup table The detail popup window
----@param row number The selected row index
+--- Update the detail popup with the current table's content
+--- TODO: add support for pdf preview via image.nvim (not supported yet)
+--- @param current_table table The current table containing the data
+--- @param detail_popup table The detail popup window
+--- @param row number The row number to show the detail for
 local function update_detail_popup(current_table, detail_popup, row)
   local image_loaded, _ = pcall(require, "image")
-  if not image_loaded then
-    print("image.nvim not loaded")
+  if image_loaded and get_type(current_table) == "pdf" then
+    local path = current_table[row][5]
+    local page = current_table[row][4]
+    local file_path = pdf_preview.GetFigPath(path, page)
+    pdf_preview.PreviewPDFwithPage(file_path, detail_popup.winid)
+    return
   end
   local item = current_table[row]
   if item then
