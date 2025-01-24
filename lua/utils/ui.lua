@@ -8,25 +8,35 @@ local event = require("nui.utils.autocmd").event
 local keymap = vim.keymap
 
 local icons = {
-  pdf = "  ",
-  url = "󰖟 ",
+  pdf = "",
+  url = "󰖟",
 }
 
 --- Get the type of the table
 --- @param table table The table containing the data
 --- @return string The type of the table
 local function get_type(table)
-  return table[1][1]
+  if table and table[1] then
+    return table[1][2]
+  else
+    return "empty"
+  end
 end
 
 --- Get the icon for the table
 --- @param table table The table containing the data
 --- @return string The icon for the table
 local function icon_with_type(table)
-  if get_type(table) == "pdf" then
-    return icons.pdf
+  if table then
+    if get_type(table) == "pdf" then
+      return icons.pdf
+    elseif get_type(table) == "url" then
+      return icons.url
+    else
+      return "󰟢"
+    end
   else
-    return icons.url
+    return "󰟢"
   end
 end
 
@@ -57,7 +67,9 @@ local function update_main_popup(current_table, main_popup)
   end
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(main_popup.bufnr, 0, -1, false, content)
-    vim.api.nvim_win_set_cursor(main_popup.winid, { 1, 5 }) -- Set cursor position to the first row and second column
+    local icon = icon_with_type(current_table)
+    local width = vim.fn.strlen(icon)
+    vim.api.nvim_win_set_cursor(main_popup.winid, { 1, width + 1 }) -- Set cursor position to the first row and second column
   end)
 end
 
