@@ -53,7 +53,7 @@ end
 
 -- --- test example
 --
--- local path = vim.fn.expand("~/Desktop/physics/visualdifferentialgeometry.pdf")
+-- local path = vim.fn.expand("~/Desktop/physics/B场论/0507118.pdf")
 -- local page = 3
 -- local fig_path = M.GetFigPath(path, page)
 --
