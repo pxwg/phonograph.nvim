@@ -10,26 +10,6 @@ local keymap = vim.keymap
 local icons = require("icons").icons
 local get_type = require("icons").get_type
 
-local function switch_table(
-  direction,
-  current_index,
-  tables,
-  main_popup,
-  _update_main_popup,
-  layout,
-  _attach_events,
-  detail_popup,
-  _update_detail_popup
-)
-  current_index = (current_index - 1 + direction + #tables) % #tables + 1
-  _update_main_popup(tables[current_index], main_popup)
-  vim.schedule(function()
-    vim.api.nvim_set_current_win(main_popup.winid)
-    _attach_events(main_popup, layout, tables[current_index], detail_popup, _update_detail_popup)
-  end)
-  return current_index
-end
-
 --- Get the icon for the table
 --- @param table table The table containing the data
 --- @return string The icon for the table
@@ -42,31 +22,53 @@ local function icon_with_type(table)
   end
 end
 
+--- Update the current table of figures
+--- @param current_table table The current table containing the data
+--- @return table The updated table with the figure paths
+local function update_pdf_preview(current_table)
+  local fig_path_tab = {}
+  for i = 1, #current_table do
+    local path = current_table[i][5]
+    local page = current_table[i][4]
+    fig_path_tab[i] = pdf_preview.GetFigPath(path, page)
+  end
+  return fig_path_tab
+end
+
 --- Update the detail popup with the current table's content
 --- TODO: add support for pdf preview via image.nvim (not finished yet)
 --- @param current_table table The current table containing the data
 --- @param detail_popup table The detail popup window
 --- @param row number The row number to show the detail for
-local function update_detail_popup(current_table, detail_popup, row)
+--- @param fig_path_tab table The table containing the figure paths
+local function update_detail_popup(current_table, detail_popup, row, fig_path_tab)
   local image_loaded, _ = pcall(require, "image")
-  if image_loaded and get_type(current_table) == "pdf" then
-    local path = current_table[row][5]
-    local page = current_table[row][4]
-    local file_path = pdf_preview.GetFigPath(path, page)
-    vim.schedule(function()
-      pdf_preview.PreviewPDFwithPage(file_path, detail_popup.winid)
-    end)
-    return
+  for i = 1, #fig_path_tab do
+    pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
   end
-  local item = current_table[row]
-  if item then
-    local content = {}
-    for k, v in pairs(item) do
-      table.insert(content, k .. ": " .. v)
-    end
+  if image_loaded and get_type(current_table) == "pdf" then
+    print("pdf")
     vim.schedule(function()
-      vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, false, content)
+      for i = 1, #fig_path_tab do
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
+      end
+      pdf_preview.PreviewPDFwithPage(fig_path_tab[row], detail_popup.winid, row)
     end)
+  else
+    print("url")
+    for i = 1, #fig_path_tab do
+      pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
+    end
+    local item = current_table[row]
+    if item then
+      local content = {}
+      for k, v in pairs(item) do
+        table.insert(content, k .. ": " .. v)
+      end
+      vim.schedule(function()
+        vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, false, content)
+      end)
+    end
   end
 end
 
@@ -91,12 +93,12 @@ end
 ---@param layout table The layout containing the popups
 ---@param current_table table The current table containing the data
 ---@param detail_popup table The detail popup window
----@param update_detail_popup_fn function The function to update the detail popup
-local function attach_events(main_popup, layout, current_table, detail_popup, update_detail_popup_fn)
+---@param fig_path_tab table The table containing the figure paths
+local function attach_events(main_popup, layout, current_table, detail_popup, fig_path_tab)
   vim.api.nvim_buf_attach(main_popup.bufnr, false, {
     on_lines = function()
       local row = vim.api.nvim_win_get_cursor(0)[1]
-      update_detail_popup_fn(current_table, detail_popup, row)
+      update_detail_popup(current_table, detail_popup, row, fig_path_tab)
       vim.schedule(function()
         vim.api.nvim_set_current_win(main_popup.winid)
       end)
@@ -110,7 +112,7 @@ local function attach_events(main_popup, layout, current_table, detail_popup, up
     buffer = main_popup.bufnr,
     callback = function()
       local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1]
-      update_detail_popup_fn(current_table, detail_popup, row)
+      update_detail_popup(current_table, detail_popup, row, fig_path_tab)
     end,
   })
 end
@@ -121,50 +123,39 @@ end
 ---@param layout table The layout containing the popups
 ---@param tables table The list of tables to switch between
 ---@param _update_main_popup function The function to update the main popup
----@param _update_detail_popup function The function to update the detail popup
 ---@param _attach_events function The function to attach events to the popup
-local function set_keymaps(
-  main_popup,
-  detail_popup,
-  layout,
-  tables,
-  _update_main_popup,
-  _update_detail_popup,
-  _attach_events
-)
+local function set_keymaps(main_popup, detail_popup, layout, tables, _update_main_popup, _attach_events, fig_path_tab)
   local current_index = 1
 
+  local function switch_table(direction)
+    current_index = (current_index - 1 + direction + #tables) % #tables + 1
+    _update_main_popup(tables[current_index], main_popup)
+    vim.schedule(function()
+      vim.api.nvim_set_current_win(main_popup.winid)
+      _attach_events(main_popup, layout, tables[current_index], detail_popup, fig_path_tab)
+    end)
+    return current_index
+  end
+
   keymap.set("n", "l", function()
-    current_index = switch_table(
-      1,
-      current_index,
-      tables,
-      main_popup,
-      _update_main_popup,
-      layout,
-      _attach_events,
-      detail_popup,
-      _update_detail_popup
-    )
+    switch_table(1)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "h", function()
-    current_index = switch_table(
-      -1,
-      current_index,
-      tables,
-      main_popup,
-      _update_main_popup,
-      layout,
-      _attach_events,
-      detail_popup,
-      _update_detail_popup
-    )
+    switch_table(-1)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
-  keymap.set("n", "j", "j", { noremap = true, silent = true, buffer = main_popup.bufnr })
+  keymap.set("n", "j", function()
+    vim.api.nvim_feedkeys("j", "n", false)
+    -- local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1] + 1
+    -- update_detail_popup(tables[current_index], detail_popup, row, fig_path_tab)
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
-  keymap.set("n", "k", "k", { noremap = true, silent = true, buffer = main_popup.bufnr })
+  keymap.set("n", "k", function()
+    vim.api.nvim_feedkeys("k", "n", false)
+    -- local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1] - 1
+    -- update_detail_popup(tables[current_index], detail_popup, row, fig_path_tab)
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "q", function()
     layout:unmount()
@@ -199,6 +190,14 @@ function M.create_selection_window(...)
     return
   end
 
+  local fig_path_tab = {}
+
+  for i = 1, #non_empty_tables do
+    if get_type(non_empty_tables[i]) == "pdf" then
+      fig_path_tab = update_pdf_preview(non_empty_tables[i])
+    end
+  end
+
   -- Create the main popup window
   local main_popup = Popup({
     enter = true,
@@ -219,7 +218,7 @@ function M.create_selection_window(...)
       readonly = false,
     },
     win_options = {
-      winblend = 10,
+      winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
   })
@@ -244,7 +243,7 @@ function M.create_selection_window(...)
       readonly = false,
     },
     win_options = {
-      winblend = 10,
+      winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
   })
@@ -275,8 +274,8 @@ function M.create_selection_window(...)
   print("Detail window ID: " .. detail_winid)
 
   update_main_popup(non_empty_tables[1], main_popup)
-  attach_events(main_popup, layout, non_empty_tables[1], detail_popup, update_detail_popup)
-  set_keymaps(main_popup, detail_popup, layout, non_empty_tables, update_main_popup, update_detail_popup, attach_events)
+  attach_events(main_popup, layout, non_empty_tables[1], detail_popup, fig_path_tab)
+  set_keymaps(main_popup, detail_popup, layout, non_empty_tables, update_main_popup, attach_events, fig_path_tab)
 end
 
 return M
