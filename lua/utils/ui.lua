@@ -10,6 +10,26 @@ local keymap = vim.keymap
 local icons = require("icons").icons
 local get_type = require("icons").get_type
 
+local function switch_table(
+  direction,
+  current_index,
+  tables,
+  main_popup,
+  _update_main_popup,
+  layout,
+  _attach_events,
+  detail_popup,
+  _update_detail_popup
+)
+  current_index = (current_index - 1 + direction + #tables) % #tables + 1
+  _update_main_popup(tables[current_index], main_popup)
+  vim.schedule(function()
+    vim.api.nvim_set_current_win(main_popup.winid)
+    _attach_events(main_popup, layout, tables[current_index], detail_popup, _update_detail_popup)
+  end)
+  return current_index
+end
+
 --- Get the icon for the table
 --- @param table table The table containing the data
 --- @return string The icon for the table
@@ -23,7 +43,7 @@ local function icon_with_type(table)
 end
 
 --- Update the detail popup with the current table's content
---- TODO: add support for pdf preview via image.nvim (not supported yet)
+--- TODO: add support for pdf preview via image.nvim (not finished yet)
 --- @param current_table table The current table containing the data
 --- @param detail_popup table The detail popup window
 --- @param row number The row number to show the detail for
@@ -33,7 +53,9 @@ local function update_detail_popup(current_table, detail_popup, row)
     local path = current_table[row][5]
     local page = current_table[row][4]
     local file_path = pdf_preview.GetFigPath(path, page)
-    pdf_preview.PreviewPDFwithPage(file_path, detail_popup.winid)
+    vim.schedule(function()
+      pdf_preview.PreviewPDFwithPage(file_path, detail_popup.winid)
+    end)
     return
   end
   local item = current_table[row]
@@ -112,21 +134,32 @@ local function set_keymaps(
 )
   local current_index = 1
 
-  local function switch_table(direction)
-    current_index = (current_index - 1 + direction + #tables) % #tables + 1
-    _update_main_popup(tables[current_index], main_popup)
-    vim.schedule(function()
-      vim.api.nvim_set_current_win(main_popup.winid)
-      _attach_events(main_popup, layout, tables[current_index], detail_popup, _update_detail_popup)
-    end)
-  end
-
   keymap.set("n", "l", function()
-    switch_table(1)
+    current_index = switch_table(
+      1,
+      current_index,
+      tables,
+      main_popup,
+      _update_main_popup,
+      layout,
+      _attach_events,
+      detail_popup,
+      _update_detail_popup
+    )
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "h", function()
-    switch_table(-1)
+    current_index = switch_table(
+      -1,
+      current_index,
+      tables,
+      main_popup,
+      _update_main_popup,
+      layout,
+      _attach_events,
+      detail_popup,
+      _update_detail_popup
+    )
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "j", "j", { noremap = true, silent = true, buffer = main_popup.bufnr })
