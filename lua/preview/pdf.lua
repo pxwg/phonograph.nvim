@@ -12,15 +12,16 @@ function M.GetFigPath(path, page)
   return vim.fn.trim(abs_fig_path)
 end
 
-function M.PreviewPDFwithPage(fig_path, windows)
+function M.PreviewPDFwithPage(fig_path, windows, ind)
+  ind = tostring(ind)
   image
     .from_file(fig_path, {
-      id = "my_image_id", -- optional, defaults to a random string
-      with_virtual_padding = true, -- optional, pads vertically with extmarks, defaults to false
+      id = ind, -- optional, defaults to a random string
+      with_virtual_padding = false, -- optional, pads vertically with extmarks, defaults to false
       window = windows,
       -- optional, binds image to an extmark which it follows. Forced to be true when
       -- `with_virtual_padding` is true. defaults to false.
-      inline = true,
+      inline = false,
 
       -- geometry (optional)
       x = 1,
@@ -31,16 +32,17 @@ function M.PreviewPDFwithPage(fig_path, windows)
     :render()
 end
 
-function M.ClearPDFwithPage(fig_path, windows)
+function M.ClearPDFwithPage(fig_path, windows, ind)
+  ind = tostring(ind)
   image
     .from_file(fig_path, {
-      id = "my_image_id", -- optional, defaults to a random string
-      with_virtual_padding = true, -- optional, pads vertically with extmarks, defaults to false
+      id = ind, -- optional, defaults to a random string
+      with_virtual_padding = false, -- optional, pads vertically with extmarks, defaults to false
       window = windows,
 
       -- optional, binds image to an extmark which it follows. Forced to be true when
       -- `with_virtual_padding` is true. defaults to false.
-      inline = true,
+      inline = false,
 
       -- geometry (optional)
       x = 1,
