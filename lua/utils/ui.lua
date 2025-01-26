@@ -43,22 +43,24 @@ end
 --- @param fig_path_tab table The table containing the figure paths
 local function update_detail_popup(current_table, detail_popup, row, fig_path_tab)
   local image_loaded, _ = pcall(require, "image")
-  for i = 1, #fig_path_tab do
-    pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
-  end
-  if image_loaded and get_type(current_table) == "pdf" then
-    print("pdf")
+  local width = vim.api.nvim_win_get_width(detail_popup.winid)
+  local height = vim.api.nvim_win_get_height(detail_popup.winid)
+  local size = { width = width, height = height }
+  if get_type(current_table) == "pdf" and image_loaded then
     vim.schedule(function()
       for i = 1, #fig_path_tab do
-        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
       end
-      pdf_preview.PreviewPDFwithPage(fig_path_tab[row], detail_popup.winid, row)
+      pdf_preview.PreviewPDFwithPage(fig_path_tab[row], detail_popup.winid, row, size)
+      print(row)
     end)
+    return
   else
-    print("url")
-    for i = 1, #fig_path_tab do
-      pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i)
-    end
+    vim.schedule(function()
+      for i = 1, #fig_path_tab do
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
+      end
+    end)
     local item = current_table[row]
     if item then
       local content = {}
@@ -112,6 +114,7 @@ local function attach_events(main_popup, layout, current_table, detail_popup, fi
     buffer = main_popup.bufnr,
     callback = function()
       local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1]
+      vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, true, {})
       update_detail_popup(current_table, detail_popup, row, fig_path_tab)
     end,
   })
@@ -134,6 +137,7 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       vim.api.nvim_set_current_win(main_popup.winid)
       _attach_events(main_popup, layout, tables[current_index], detail_popup, fig_path_tab)
     end)
+    print(get_type(tables[current_index]))
     return current_index
   end
 
@@ -253,7 +257,7 @@ function M.create_selection_window(...)
     {
       position = "50%",
       size = {
-        width = 80,
+        width = "60%",
         height = "60%",
       },
     },
@@ -267,11 +271,8 @@ function M.create_selection_window(...)
   main_popup:mount()
   detail_popup:mount()
 
-  -- Get and print window IDs
-  local main_winid = main_popup.winid
-  local detail_winid = detail_popup.winid
-  print("Main window ID: " .. main_winid)
-  print("Detail window ID: " .. detail_winid)
+  print(detail_popup.win_config.width)
+  print(detail_popup.win_config.height)
 
   update_main_popup(non_empty_tables[1], main_popup)
   attach_events(main_popup, layout, non_empty_tables[1], detail_popup, fig_path_tab)
