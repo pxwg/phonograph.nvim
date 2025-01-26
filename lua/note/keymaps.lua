@@ -1,13 +1,20 @@
 -- deafult workflows with keymapping
+local pdf = require("preview.pdf")
 local rem = require("utils.rem")
 local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
 
 --- adding reading states
+--- cannot work right now!!!!!
 --- workflow: read -> remember
 map("n", "<leader>nn", function()
-  rem.InsertPDFurl()
+  local tab = rem.InsertPDFurl()
+  local out = {}
+  for i = 1, #tab do
+    out = rem.line_to_table(tab[i])
+  end
+  pdf.GetFigPath(out[4], out[3])
 end, { noremap = true, silent = true, desc = "[N]ew [n]ote" })
 
 --- open pdf reading selection ui

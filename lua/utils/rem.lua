@@ -94,6 +94,7 @@ function M.InsertPDFurl()
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
   M.InsertLinesAtTop({ pdf, url }, pos)
+  return { pdf, url }
 end
 
 ---@return table|nil {path: string, page: number, scrollY: number, url: string} or nil
@@ -171,6 +172,25 @@ function M.get_all_pdfs(file_path)
 
   file:close()
   return paths
+end
+
+--- Transfer single line to a table element
+--- @param line string
+--- @return table
+function M.line_to_table(line)
+  if not line then
+    return {}
+  end
+
+  local path = line:match("path: ([^\n,]+)"):gsub("^%s+", ""):gsub("%s+$", "")
+  local page = line:match("page: (%d+)")
+  if path then
+    local extracted_path = path:match(".+/([^/]+%.pdf)")
+    if extracted_path then
+      return { "pdf", extracted_path, page, path }
+    end
+  end
+  return {}
 end
 
 --- Parses the file content and returns all titles from lines containing 'title'
