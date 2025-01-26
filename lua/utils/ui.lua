@@ -30,7 +30,7 @@ local function update_pdf_preview(current_table)
   for i = 1, #current_table do
     local path = current_table[i][5]
     local page = current_table[i][4]
-    fig_path_tab[i] = pdf_preview.GetFigPath(path, page)
+    fig_path_tab[i] = pdf_preview.TransFigPath(path, page)
   end
   return fig_path_tab
 end
