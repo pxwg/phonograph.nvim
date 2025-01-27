@@ -1,4 +1,5 @@
 -- deafult workflows with keymapping
+local icon = require("icons")
 local pdf = require("preview.pdf")
 local rem = require("utils.rem")
 local sel = require("utils.select")
@@ -6,15 +7,26 @@ local ui = require("utils.ui")
 local map = vim.keymap.set
 
 --- adding reading states
---- cannot work right now!!!!!
 --- workflow: read -> remember
 map("n", "<leader>nn", function()
   local tab = rem.InsertPDFurl()
+  if not tab then
+    print("Error: rem.InsertPDFurl() returned nil")
+    return
+  end
   local out = {}
   for i = 1, #tab do
-    out = rem.line_to_table(tab[i])
+    if not tab[i] then
+      print("Error: tab[" .. i .. "] is nil")
+      return
+    end
+    if string.match(tab[i], "%.pdf$") then
+      out = rem.line_to_table(tab[i])
+    end
   end
-  pdf.GetFigPath(out[4], out[3])
+  vim.schedule(function()
+    pdf.GetFigPath(out[4], out[3])
+  end)
 end, { noremap = true, silent = true, desc = "[N]ew [n]ote" })
 
 --- open pdf reading selection ui

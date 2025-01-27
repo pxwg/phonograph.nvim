@@ -93,6 +93,7 @@ function M.InsertPDFurl()
   pos = { row = pos[1], col = pos[2] }
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
+  print(pdf, url)
   M.InsertLinesAtTop({ pdf, url }, pos)
   return { pdf, url }
 end
@@ -182,7 +183,12 @@ function M.line_to_table(line)
     return {}
   end
 
-  local path = line:match("path: ([^\n,]+)"):gsub("^%s+", ""):gsub("%s+$", "")
+  local path = line:match("path: ([^\n,]+)")
+  if not path then
+    return {}
+  end
+
+  path = path:gsub("^%s+", ""):gsub("%s+$", "")
   local page = line:match("page: (%d+)")
   if path then
     local extracted_path = path:match(".+/([^/]+%.pdf)")

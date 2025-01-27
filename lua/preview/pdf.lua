@@ -2,7 +2,14 @@ local M = {}
 
 local image = require("image")
 
+--- @param path string
+--- @param page number
+--- @return string
 function M.GetFigPath(path, page)
+  if not path or not page then
+    error("Invalid arguments: path and page must be provided")
+  end
+
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")
   local fig_path =
     string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, page)
