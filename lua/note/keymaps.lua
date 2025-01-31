@@ -1,31 +1,38 @@
 -- deafult workflows with keymapping
 local icon = require("icons")
-local pdf = require("preview.pdf")
+local mark = require("utils.bookmark")
+local prev_pdf = require("preview.pdf")
 local rem = require("utils.rem")
 local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
 
 --- adding reading states
---- workflow: read -> remember
+--- workflow: read -> remember (included saving the reading state and get the figure of current path)
 map("n", "<leader>nn", function()
   local tab = rem.InsertPDFurl()
   if not tab then
     print("Error: rem.InsertPDFurl() returned nil")
     return
   end
-  local out = {}
-  for i = 1, #tab do
-    if not tab[i] then
-      print("Error: tab[" .. i .. "] is nil")
-      return
-    end
-    if string.match(tab[i], "%.pdf$") then
-      out = rem.line_to_table(tab[i])
-    end
-  end
+  local pdf = rem.pdf_line_to_table(tab.pdf)
+  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf, P: 3, Nerd Fonts - Iconic font aggregator
+  local url = rem.url_line_to_table(tab.url)
+  print(tab.url)
+  print(url.title)
+  -- for i = 1, #tab do
+  --   if not tab[i] then
+  --     print("Error: tab[" .. i .. "] is nil")
+  --     return
+  --   elseif string.match(tab[i], "%.pdf$") then
+  -- pdf = rem.pdf_line_to_table(tab[i])
+  --   elseif string.match(tab[i], "url:%s+") then
+  -- url = rem.url_line_to_table(tab[i])
+  --   end
+  -- end
+  mark.insert_note_at_cursor({ pdf.title, "P: " .. pdf.page, url.title })
   vim.schedule(function()
-    pdf.GetFigPath(out[4], out[3])
+    prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)
 end, { noremap = true, silent = true, desc = "[N]ew [n]ote" })
 
