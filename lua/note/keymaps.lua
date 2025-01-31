@@ -16,7 +16,6 @@ map("n", "<leader>nn", function()
     return
   end
   local pdf = rem.pdf_line_to_table(tab.pdf)
-  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf, P: 3, Nerd Fonts - Iconic font aggregator
   local url = rem.url_line_to_table(tab.url)
   print(tab.url)
   print(url.title)
@@ -30,7 +29,8 @@ map("n", "<leader>nn", function()
   -- url = rem.url_line_to_table(tab[i])
   --   end
   -- end
-  mark.insert_note_at_cursor({ pdf.title, "P: " .. pdf.page, url.title })
+  --- TODO: fully costumizable bookmark
+  mark.insert_note_at_cursor(pdf.title, "Page:" .. pdf.page, url.title)
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)

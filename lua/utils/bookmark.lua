@@ -20,16 +20,18 @@ function M.comment_string(input)
 end
 
 --- input the table of bookmarks, return the comment of note
---- @param  titles string[] The note to be inserted
+--- @param  ... table The note to be inserted
 --- @return nil
-function M.insert_note_at_cursor(titles)
+function M.insert_note_at_cursor(...)
+  local titles = { ... }
   local filtered_args = {}
   for _, arg in ipairs(titles) do
     if arg ~= nil and arg ~= "" then
       table.insert(filtered_args, tostring(arg))
     end
   end
-  local note = "MARK : " .. table.concat(filtered_args, ", ")
+  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf;Page:3;Nerd Fonts - Iconic font aggregator
+  local note = "MARK : " .. table.concat(filtered_args, ";")
   local comment_note = M.comment_string(note)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local row = cursor_pos[1]

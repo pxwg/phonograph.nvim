@@ -35,8 +35,9 @@ local function update_pdf_preview(current_table)
   return fig_path_tab
 end
 
---- Update the detail popup with the current table's content
 --- TODO: add support for pdf preview via image.nvim (not finished yet)
+---
+--- Update the detail popup with the current table's content
 --- @param current_table table The current table containing the data
 --- @param detail_popup table The detail popup window
 --- @param row number The row number to show the detail for
@@ -271,8 +272,8 @@ function M.create_selection_window(...)
   main_popup:mount()
   detail_popup:mount()
 
-  print(detail_popup.win_config.width)
-  print(detail_popup.win_config.height)
+  -- print(detail_popup.win_config.width)
+  -- print(detail_popup.win_config.height)
 
   update_main_popup(non_empty_tables[1], main_popup)
   attach_events(main_popup, layout, non_empty_tables[1], detail_popup, fig_path_tab)
