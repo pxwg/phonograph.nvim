@@ -93,9 +93,10 @@ function M.InsertPDFurl()
   pos = { row = pos[1], col = pos[2] }
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
+  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf, P: 3
   print(pdf, url)
   M.InsertLinesAtTop({ pdf, url }, pos)
-  return { pdf, url }
+  return { pdf = pdf, url = url }
 end
 
 ---@return table|nil {path: string, page: number, scrollY: number, url: string} or nil
@@ -175,10 +176,10 @@ function M.get_all_pdfs(file_path)
   return paths
 end
 
---- Transfer single line to a table element
+--- Transfer single pdf line to a table element
 --- @param line string
 --- @return table
-function M.line_to_table(line)
+function M.pdf_line_to_table(line)
   if not line then
     return {}
   end
@@ -193,7 +194,7 @@ function M.line_to_table(line)
   if path then
     local extracted_path = path:match(".+/([^/]+%.pdf)")
     if extracted_path then
-      return { "pdf", extracted_path, page, path }
+      return { type = "pdf", title = extracted_path, page = page, path = path }
     end
   end
   return {}
@@ -222,6 +223,24 @@ function M.get_all_titles(file_path)
 
   file:close()
   return titles
+end
+
+--- Transfer single url line to a table element
+--- @param urls string
+--- @return table
+function M.url_line_to_table(urls)
+  if not urls then
+    return {}
+  end
+
+  local title = urls:match("title:([^,]+)")
+  local url = urls:match("url:([^\n,]+)}")
+  local scrollY = urls:match("scrollY:(%d+)")
+  local num = urls:match("{(%d+),")
+  if title then
+    return { type = "url", num = num, title = title, pos = scrollY, url = url }
+  end
+  return {}
 end
 
 -- -----keymap for debugging and testing---------
