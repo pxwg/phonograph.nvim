@@ -30,6 +30,7 @@ map("n", "<leader>nn", function()
   --   end
   -- end
   --- TODO: fully costumizable bookmark
+  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf;Page:3;个人信息 - 个人中心 - bilibili link
   mark.insert_note_at_cursor(pdf.title, "Page:" .. pdf.page, url.title)
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
