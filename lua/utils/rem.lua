@@ -147,7 +147,7 @@ end
 
 --- Parses the file content and returns all paths from lines
 --- Only keeps the content matching 'xxx.pdf'
----@param file_path string
+---@param file_path string {xxx(num),path:xxx,page:xxx}
 ---@return table
 function M.get_all_pdfs(file_path)
   local file = io.open(file_path, "r")
@@ -166,7 +166,7 @@ function M.get_all_pdfs(file_path)
         -- Extract the part matching 'xxx.pdf'
         local extracted_path = path:match(".+/([^/]+%.pdf)")
         if extracted_path then
-          table.insert(paths, { "pdf", num, extracted_path, page, path })
+          table.insert(paths, { type = "pdf", pos = num, title = extracted_path, page = page, path = path })
         end
       end
     end
@@ -177,7 +177,7 @@ function M.get_all_pdfs(file_path)
 end
 
 --- Transfer single pdf line to a table element
---- @param line string
+--- @param line string {xxx(num),path:xxx,page:xxx}
 --- @return table
 function M.pdf_line_to_table(line)
   if not line then
@@ -201,7 +201,7 @@ function M.pdf_line_to_table(line)
 end
 
 --- Parses the file content and returns all titles from lines containing 'title'
----@param file_path string
+---@param file_path string {xxx(num),title:xxx,url:xxx,scrollY:xxx}
 ---@return table
 function M.get_all_titles(file_path)
   local file = io.open(file_path, "r")
@@ -217,7 +217,7 @@ function M.get_all_titles(file_path)
     local scrollY = line:match("scrollY:(%d+)")
     local num = line:match("{(%d+),")
     if title then
-      table.insert(titles, { "url", num, title, scrollY, url })
+      table.insert(titles, { type = "url", pos = num, title = title, scroll = scrollY, url = url })
     end
   end
 
@@ -226,7 +226,7 @@ function M.get_all_titles(file_path)
 end
 
 --- Transfer single url line to a table element
---- @param urls string
+--- @param urls string {xxx(num),title:xxx,url:xxx,scrollY:xxx}
 --- @return table
 function M.url_line_to_table(urls)
   if not urls then
