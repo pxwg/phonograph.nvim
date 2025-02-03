@@ -35,8 +35,6 @@ local function update_pdf_preview(current_table)
   return fig_path_tab
 end
 
---- TODO: add support for pdf preview via image.nvim (not finished yet)
----
 --- Update the detail popup with the current table's content
 --- @param current_table table The current table containing the data
 --- @param detail_popup table The detail popup window
