@@ -138,7 +138,6 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       vim.api.nvim_set_current_win(main_popup.winid)
       _attach_events(main_popup, layout, tables[current_index], detail_popup, fig_path_tab)
     end)
-    -- print(get_type(tables[current_index]))
     return current_index
   end
 
@@ -152,14 +151,10 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
 
   keymap.set("n", "j", function()
     vim.api.nvim_feedkeys("j", "n", false)
-    -- local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1] + 1
-    -- update_detail_popup(tables[current_index], detail_popup, row, fig_path_tab)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "k", function()
     vim.api.nvim_feedkeys("k", "n", false)
-    -- local row = vim.api.nvim_win_get_cursor(main_popup.winid)[1] - 1
-    -- update_detail_popup(tables[current_index], detail_popup, row, fig_path_tab)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "q", function()
@@ -190,7 +185,7 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       end
       layout:unmount()
     end)
-  end, { noremap = true, silent = true })
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "<C-y>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
@@ -208,7 +203,7 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       end
       layout:unmount()
     end)
-  end, { noremap = true, silent = true })
+  end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 end
 
 --- Create the selection window with the given tables
