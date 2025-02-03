@@ -191,6 +191,24 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       layout:unmount()
     end)
   end, { noremap = true, silent = true })
+
+  keymap.set("n", "<C-y>", function()
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    if get_type(tables[current_index]) == "pdf" then
+      api.OpenSkimToReadingState(tables[current_index][row].page, tables[current_index][row].path)
+    else
+      api.OpenUntilReady(tables[current_index][row].url, tables[current_index][row].scroll)
+    end
+    vim.schedule(function()
+      local width = vim.api.nvim_win_get_width(detail_popup.winid)
+      local height = vim.api.nvim_win_get_height(detail_popup.winid)
+      local size = { width = width, height = height }
+      for i = 1, #fig_path_tab do
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
+      end
+      layout:unmount()
+    end)
+  end, { noremap = true, silent = true })
 end
 
 --- Create the selection window with the given tables
@@ -226,7 +244,7 @@ function M.create_selection_window(...)
     border = {
       style = "single",
       text = {
-        top = "Selection History",
+        top = " Selection ",
         top_align = "center",
       },
     },
@@ -240,7 +258,7 @@ function M.create_selection_window(...)
     },
     win_options = {
       winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePromptTitle",
     },
   })
 
@@ -251,7 +269,7 @@ function M.create_selection_window(...)
     border = {
       style = "single",
       text = {
-        top = "Detail View",
+        top = " Detail ",
         top_align = "center",
       },
     },
@@ -265,7 +283,7 @@ function M.create_selection_window(...)
     },
     win_options = {
       winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePreviewTitle",
     },
   })
 
