@@ -50,13 +50,12 @@ local function update_detail_popup(current_table, detail_popup, row, fig_path_ta
   if get_type(current_table) == "pdf" and image_loaded then
     vim.schedule(function()
       vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, false, {})
-    end)
-    vim.schedule(function()
       for i = 1, #fig_path_tab do
         pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
       end
-      pdf_preview.PreviewPDFwithPage(fig_path_tab[row], detail_popup.winid, row, size)
-      print(row)
+      if row >= 1 and row <= #fig_path_tab then
+        pdf_preview.PreviewPDFwithPage(fig_path_tab[row], detail_popup.winid, row, size)
+      end
     end)
     return
   else
@@ -141,7 +140,7 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
       vim.api.nvim_set_current_win(main_popup.winid)
       _attach_events(main_popup, layout, tables[current_index], detail_popup, fig_path_tab)
     end)
-    print(get_type(tables[current_index]))
+    -- print(get_type(tables[current_index]))
     return current_index
   end
 
