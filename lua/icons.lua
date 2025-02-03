@@ -10,11 +10,11 @@ M.icons = {
 --- @param table table
 --- @return string The icon type of table
 function M.get_type(table)
-  while type(table) == "table" and table[1] ~= nil do
+  while table.type == nil do
     table = table[1]
   end
-  local result = table
-  return tostring(result)
+  local result = table.type
+  return result
 end
 
 return M

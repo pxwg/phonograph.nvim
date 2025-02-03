@@ -17,8 +17,6 @@ map("n", "<leader>nn", function()
   end
   local pdf = rem.pdf_line_to_table(tab.pdf)
   local url = rem.url_line_to_table(tab.url)
-  print(tab.url)
-  print(url.title)
   -- for i = 1, #tab do
   --   if not tab[i] then
   --     print("Error: tab[" .. i .. "] is nil")
@@ -30,8 +28,7 @@ map("n", "<leader>nn", function()
   --   end
   -- end
   --- TODO: fully costumizable bookmark
-  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf;Page:3;个人信息 - 个人中心 - bilibili link
-  mark.insert_note_at_cursor(pdf.title, "Page:" .. pdf.page, url.title)
+  mark.insert_note_at_cursor(pdf.title, pdf.page, url.title)
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)
@@ -41,8 +38,10 @@ end, { noremap = true, silent = true, desc = "[N]ew [n]ote" })
 --- workflow: read -> back to the point of past -> restore the reading state
 map("n", "<leader>nr", function()
   local path = rem.get_file_path()
+
   local table1 = rem.get_all_pdfs(path)
   local table2 = rem.get_all_titles(path)
+
   local pos = vim.api.nvim_win_get_cursor(0)
 
   local indPDF = sel.GenerateIndex(table1)
