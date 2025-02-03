@@ -1,6 +1,8 @@
 local M = {}
 
 --- Find the Mark symbol at the start of the line
+---
+--- @return table line_numbers
 function M.find_at_line_start()
   local search_pattern = "'-- MARK :'"
   local cmd = string.format("rg -n '%s' %s", search_pattern, vim.fn.expand("%:p"))
