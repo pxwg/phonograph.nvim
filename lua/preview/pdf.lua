@@ -7,7 +7,7 @@ local image = require("image")
 --- @return string
 function M.GetFigPath(path, page)
   if not path or not page then
-    error("Invalid arguments: path and page must be provided")
+    return ""
   end
 
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")

@@ -9,8 +9,9 @@ local M = {}
 function M.get_file_path()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
-  file_path = file_path:gsub("^%s+", ""):gsub("%s+$", "")
-  return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path:gsub("/", "_") .. ".txt"
+  -- MARK : hw7.pdf;1;jbyuki/nabla.nvim: take your scientific notes :pencil2: in Neovim
+  file_path = file_path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%.", ""):gsub("/", "_")
+  return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".txt"
 end
 
 ---@param file_path string
@@ -93,8 +94,6 @@ function M.InsertPDFurl()
   pos = { row = pos[1], col = pos[2] }
   local url = api.ReturnChormeReadingState()
   local pdf = api.ReturnSkimReadingState()
-  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf, P: 3
-  print(pdf, url)
   M.InsertLinesAtTop({ pdf, url }, pos)
   return { pdf = pdf, url = url }
 end
@@ -152,7 +151,7 @@ end
 function M.get_all_pdfs(file_path)
   local file = io.open(file_path, "r")
   if not file then
-    print("Error: Unable to open file " .. file_path)
+    -- print("Error: Unable to open file " .. file_path)
     return {}
   end
 
@@ -206,7 +205,7 @@ end
 function M.get_all_titles(file_path)
   local file = io.open(file_path, "r")
   if not file then
-    print("Error: Unable to open file " .. file_path)
+    -- print("Error: Unable to open file " .. file_path)
     return {}
   end
 

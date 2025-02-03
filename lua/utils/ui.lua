@@ -28,8 +28,8 @@ end
 local function update_pdf_preview(current_table)
   local fig_path_tab = {}
   for i = 1, #current_table do
-    local path = current_table[i][5]
-    local page = current_table[i][4]
+    local path = current_table[i].path
+    local page = current_table[i].page
     fig_path_tab[i] = pdf_preview.TransFigPath(path, page)
   end
   return fig_path_tab
@@ -48,6 +48,9 @@ local function update_detail_popup(current_table, detail_popup, row, fig_path_ta
   local height = vim.api.nvim_win_get_height(detail_popup.winid)
   local size = { width = width, height = height }
   if get_type(current_table) == "pdf" and image_loaded then
+    vim.schedule(function()
+      vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, false, {})
+    end)
     vim.schedule(function()
       for i = 1, #fig_path_tab do
         pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
@@ -81,7 +84,7 @@ end
 local function update_main_popup(current_table, main_popup)
   local content = {}
   for _, item in ipairs(current_table) do
-    table.insert(content, icon_with_type(current_table) .. item[3])
+    table.insert(content, icon_with_type(current_table) .. item.title)
   end
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(main_popup.bufnr, 0, -1, false, content)
@@ -163,17 +166,33 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "q", function()
-    layout:unmount()
+    vim.schedule(function()
+      local width = vim.api.nvim_win_get_width(detail_popup.winid)
+      local height = vim.api.nvim_win_get_height(detail_popup.winid)
+      local size = { width = width, height = height }
+      for i = 1, #fig_path_tab do
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
+      end
+      layout:unmount()
+    end)
   end, { noremap = true, silent = true, buffer = main_popup.bufnr })
 
   keymap.set("n", "<CR>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
     if get_type(tables[current_index]) == "pdf" then
-      api.OpenSkimToReadingState(tables[current_index][row][4], tables[current_index][row][5])
+      api.OpenSkimToReadingState(tables[current_index][row].page, tables[current_index][row].path)
     else
-      api.OpenUntilReady(tables[current_index][row][5], tables[current_index][row][4])
+      api.OpenUntilReady(tables[current_index][row].url, tables[current_index][row].scroll)
     end
-    layout:unmount()
+    vim.schedule(function()
+      local width = vim.api.nvim_win_get_width(detail_popup.winid)
+      local height = vim.api.nvim_win_get_height(detail_popup.winid)
+      local size = { width = width, height = height }
+      for i = 1, #fig_path_tab do
+        pdf_preview.ClearPDFwithPage(fig_path_tab[i], detail_popup.winid, i, size)
+      end
+      layout:unmount()
+    end)
   end, { noremap = true, silent = true })
 end
 

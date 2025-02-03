@@ -8,7 +8,7 @@ local M = {}
 function M.GenerateIndex(tbl)
   local indices = {}
   for _, entry in ipairs(tbl) do
-    table.insert(indices, entry[2]) -- Use the num value as the index
+    table.insert(indices, entry.pos) -- Use the num value as the index
   end
   return indices
 end
