@@ -59,7 +59,6 @@ cmd({ "TextChanged" }, {
   callback = function()
     local current_tags = search.find_at_line_start()
     local current_inside = get_line_inside(current_tags)
-    -- MARK : MIT_8.513_Fall2017.pdf;141;金牌得主 在线 漫画 - Google Search
 
     local current_inside_in = {}
     for i = 1, #current_inside do
