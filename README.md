@@ -1,10 +1,10 @@
 # *note.nvim*: Take Notes Everywhere with Neovim
 
-<p align="center">[简体中文](./readme/zh_cn.md)</p>
+<p align="center"><a href="./readme/zh_cn.md">简体中文</a></p>
 
 ## Introduction
 
-The advantage of taking notes in Neovim lies in its speed and unparalleled customization. However, if we want to quickly take notes using our favorite text editor—Neovim in my case—while reading web pages or papers (usually in PDF format), we lack an effective tool to help us achieve this goal naturally. To accomplish this, we need at least:
+The advantage of writing notes in Neovim lies in its speed and unparalleled customization properties. However, if we expect to quickly use our most handy text editor—Neovim, in my case—to take notes while reading web pages or papers (which are usually in PDF format), we lack an effective tool to help us naturally achieve this goal. To accomplish this function, at least the following is needed:
 
 * Record the current reading state, including:
   * The URL and position of the current web page being read
