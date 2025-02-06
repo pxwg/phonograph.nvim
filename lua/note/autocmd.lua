@@ -23,18 +23,22 @@ local function compare_tables(table1, table2)
   local differences = { added = {}, removed = {} }
   local similarities = {}
 
-  for key, value in pairs(table2) do
-    if table1[key] == value then
-      table.insert(similarities, key)
+  local table1_set = {}
+  for _, value in ipairs(table1) do
+    table1_set[value] = true
+  end
+
+  for _, value in ipairs(table2) do
+    if table1_set[value] then
+      table.insert(similarities, value)
+      table1_set[value] = nil
     else
-      table.insert(differences.added, key)
+      table.insert(differences.added, value)
     end
   end
 
-  for key, value in pairs(table1) do
-    if table2[key] == nil then
-      table.insert(differences.removed, key)
-    end
+  for value, _ in pairs(table1_set) do
+    table.insert(differences.removed, value)
   end
 
   return similarities, differences
@@ -55,7 +59,7 @@ cmd("BufEnter", {
 })
 
 cmd({ "TextChanged" }, {
-  pattern = "*",
+  pattern = "*.tex",
   callback = function()
     local current_tags = search.find_at_line_start()
     local current_inside = get_line_inside(current_tags)
@@ -65,5 +69,11 @@ cmd({ "TextChanged" }, {
       local inside = current_inside[i].inside
       table.insert(current_inside_in, inside)
     end
+
+    print("Previous Inside: ", vim.inspect(_G.prev_inside.insider))
+    print("Current Inside: ", vim.inspect(current_inside_in))
+
+    local similarities, differences = compare_tables(_G.prev_inside, current_inside_in)
+    _G.perv_inside = current_inside_in
   end,
 })
