@@ -30,7 +30,6 @@ function M.insert_note_at_cursor(...)
       table.insert(filtered_args, tostring(arg))
     end
   end
-  -- MARK : 2024-2025“雅望南归”寒假回访计划（V0111).pdf;Page:3;Nerd Fonts - Iconic font aggregator
   local note = "MARK : " .. table.concat(filtered_args, ";")
   local comment_note = M.comment_string(note)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
