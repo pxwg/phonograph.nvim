@@ -1,6 +1,7 @@
 -- ui module for show the history of urls and pdfs
 local M = {}
 local api = require("utils.api")
+local note = require("note")
 local pdf_preview = require("preview.pdf")
 
 local Layout = require("nui.layout")
@@ -45,7 +46,7 @@ local function update_detail_popup(current_table, detail_popup, row, fig_path_ta
   local width = vim.api.nvim_win_get_width(detail_popup.winid)
   local height = vim.api.nvim_win_get_height(detail_popup.winid)
   local size = { width = width, height = height }
-  if get_type(current_table) == "pdf" and image_loaded then
+  if get_type(current_table) == "pdf" and image_loaded and note.opts.integration.image then
     vim.schedule(function()
       vim.api.nvim_buf_set_lines(detail_popup.bufnr, 0, -1, false, {})
       for i = 1, #fig_path_tab do
@@ -236,50 +237,52 @@ function M.create_selection_window(...)
   local main_popup = Popup({
     enter = true,
     focusable = true,
-    border = {
-      style = "single",
-      text = {
-        top = " Selection ",
-        top_align = "center",
-      },
-    },
-    size = {
-      width = "100%",
-      height = "100%",
-    },
-    buf_options = {
-      modifiable = true,
-      readonly = false,
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePromptTitle",
-    },
+    note.opts.ui.selection,
+    -- border = {
+    --   style = "single",
+    --   text = {
+    --     top = " Selection ",
+    --     top_align = "center",
+    --   },
+    -- },
+    -- size = {
+    --   width = "100%",
+    --   height = "100%",
+    -- },
+    -- buf_options = {
+    --   modifiable = true,
+    --   readonly = false,
+    -- },
+    -- win_options = {
+    --   winblend = 0,
+    --   winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePromptTitle",
+    -- },
   })
 
   -- Create the detail view popup window
   local detail_popup = Popup({
     enter = false,
     focusable = false,
-    border = {
-      style = "single",
-      text = {
-        top = " Detail ",
-        top_align = "center",
-      },
-    },
-    size = {
-      width = "100%",
-      height = "100%",
-    },
-    buf_options = {
-      modifiable = true,
-      readonly = false,
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePreviewTitle",
-    },
+    note.opts.ui.preview,
+    -- border = {
+    --   style = "single",
+    --   text = {
+    --     top = " Detail ",
+    --     top_align = "center",
+    --   },
+    -- },
+    -- size = {
+    --   width = "100%",
+    --   height = "100%",
+    -- },
+    -- buf_options = {
+    --   modifiable = true,
+    --   readonly = false,
+    -- },
+    -- win_options = {
+    --   winblend = 0,
+    --   winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePreviewTitle",
+    -- },
   })
 
   -- Layout
