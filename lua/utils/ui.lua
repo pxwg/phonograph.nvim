@@ -234,56 +234,17 @@ function M.create_selection_window(...)
   end
 
   -- Create the main popup window
-  local main_popup = Popup({
+  local main_popup = Popup(vim.tbl_deep_extend("force", {
     enter = true,
     focusable = true,
-    note.opts.ui.selection,
-    -- border = {
-    --   style = "single",
-    --   text = {
-    --     top = " Selection ",
-    --     top_align = "center",
-    --   },
-    -- },
-    -- size = {
-    --   width = "100%",
-    --   height = "100%",
-    -- },
-    -- buf_options = {
-    --   modifiable = true,
-    --   readonly = false,
-    -- },
-    -- win_options = {
-    --   winblend = 0,
-    --   winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePromptTitle",
-    -- },
-  })
+  }, note.opts.ui.selection))
 
   -- Create the detail view popup window
-  local detail_popup = Popup({
+
+  local detail_popup = Popup(vim.tbl_deep_extend("force", {
     enter = false,
     focusable = false,
-    note.opts.ui.preview,
-    -- border = {
-    --   style = "single",
-    --   text = {
-    --     top = " Detail ",
-    --     top_align = "center",
-    --   },
-    -- },
-    -- size = {
-    --   width = "100%",
-    --   height = "100%",
-    -- },
-    -- buf_options = {
-    --   modifiable = true,
-    --   readonly = false,
-    -- },
-    -- win_options = {
-    --   winblend = 0,
-    --   winhighlight = "Normal:TelescopeNormal,FloatBorder:TelescopeBorder,FloatTitle:TelescopePreviewTitle",
-    -- },
-  })
+  }, note.opts.ui.preview))
 
   -- Layout
   local layout = Layout(
