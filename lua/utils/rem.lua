@@ -196,7 +196,7 @@ function M.pdf_line_to_table(line)
       return { type = "pdf", title = extracted_path, page = page, path = path }
     end
   end
-  return {}
+  return { type = "pdf", title = "", page = "", path = "" }
 end
 
 --- Parses the file content and returns all titles from lines containing 'title'
@@ -239,7 +239,7 @@ function M.url_line_to_table(urls)
   if title then
     return { type = "url", num = num, title = title, pos = scrollY, url = url }
   end
-  return {}
+  return { type = "url", num = "", title = "", pos = "", url = "" }
 end
 
 -- -----keymap for debugging and testing---------
