@@ -22,13 +22,13 @@ map("n", "<leader>nn", function()
   --     print("Error: tab[" .. i .. "] is nil")
   --     return
   --   elseif string.match(tab[i], "%.pdf$") then
-  -- pdf = rem.pdf_line_to_table(tab[i])
+  --     pdf = rem.pdf_line_to_table(tab[i])
   --   elseif string.match(tab[i], "url:%s+") then
-  -- url = rem.url_line_to_table(tab[i])
+  --     url = rem.url_line_to_table(tab[i])
   --   end
   -- end
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor(pdf.title, pdf.page, url.title)
+  mark.insert_note_at_cursor(url.title, pdf.title, pdf.path, pdf.page)
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)
