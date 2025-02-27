@@ -13,11 +13,34 @@ function M.GetFigPath(path, page)
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")
   local fig_path =
     string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, page)
-  vim.fn.system(
-    string.format('pdftoppm -f %d -l %d -png -rx 200 -ry 200 -singlefile "%s" "%s"', page, page, path, fig_path)
-  )
-  local abs_fig_path = vim.fn.system(string.format('realpath "%s.png"', fig_path))
-  return vim.fn.trim(abs_fig_path)
+  require("plenary.job")
+    :new({
+      command = "pdftoppm",
+      args = {
+        "-f",
+        tostring(page),
+        "-l",
+        tostring(page),
+        "-png",
+        "-rx",
+        "200",
+        "-ry",
+        "200",
+        "-singlefile",
+        path,
+        fig_path,
+      },
+      on_exit = function(j, return_val)
+        if return_val == 0 then
+          vim.notify("PDF page converted successfully", vim.log.levels.INFO)
+        else
+          print("Error converting PDF page: " .. table.concat(j:stderr_result(), "\n"))
+        end
+      end,
+    })
+    :start()
+  -- local abs_fig_path = vim.fn.system(string.format('realpath "%s.png"', fig_path))
+  return vim.fn.trim(fig_path)
 end
 
 function M.TransFigPath(path, page)
