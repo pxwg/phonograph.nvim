@@ -190,14 +190,15 @@ function M.get_all_pdfs(file_path)
   local paths = {}
   for line in file:lines() do
     if line:match("page:") then
-      local path = line:match("path: ([^,]+)}")
+      local path = line:match("path: ([^,]+)")
       local page = line:match("page: (%d+)")
       local num = line:match("{(%d+),")
+      local tag = line:match("tag:(%d+)}") -- 修改此行以正确提取 tag 后的数字
       if path and num then
         -- Extract the part matching 'xxx.pdf'
         local extracted_path = path:match(".+/([^/]+%.pdf)")
         if extracted_path then
-          table.insert(paths, { type = "pdf", pos = num, title = extracted_path, page = page, path = path })
+          table.insert(paths, { type = "pdf", pos = num, title = extracted_path, page = page, path = path, tag = tag })
         end
       end
     end
@@ -221,14 +222,16 @@ function M.pdf_line_to_table(line)
   end
 
   path = path:gsub("^%s+", ""):gsub("%s+$", "")
+  local tag = line:match("tag:(%d+)")
   local page = line:match("page: (%d+)")
   if path then
     local extracted_path = path:match(".+/([^/]+%.pdf)")
+
     if extracted_path then
-      return { type = "pdf", title = extracted_path, page = page, path = path }
+      return { type = "pdf", title = extracted_path, page = page, path = path, tag = tag }
     end
   end
-  return { type = "pdf", title = "", page = "", path = "" }
+  return { type = "pdf", title = "", page = "", path = "", tag = "" }
 end
 
 --- Parses the file content and returns all titles from lines containing 'title'
@@ -243,7 +246,7 @@ function M.get_all_titles(file_path)
 
   local titles = {}
   for line in file:lines() do
-    local tag = line:match("tag:(%d+)")
+    local tag = line:match("tag:(%d+),")
     local title = line:match("title:([^,]+)")
     local url = line:match("url:([^\n,]+)}")
     local scrollY = line:match("scrollY:(%d+)")
@@ -264,7 +267,7 @@ function M.url_line_to_table(urls)
   if not urls then
     return {}
   end
-  local tag = urls:match("tag:(%d+)")
+  local tag = urls:match("tag:(%d+),")
   local title = urls:match("title:([^,]+)")
   local url = urls:match("url:([^\n,]+)}")
   local scrollY = urls:match("scrollY:(%d+)")

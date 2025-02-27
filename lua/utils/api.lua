@@ -37,7 +37,7 @@ function M.ReturnSkimReadingState()
             set currentDocument to front document
             set documentPath to path of currentDocument
             set currentPage to get index of current page of currentDocument
-            return "page: " & currentPage & ", path: " & documentPath & ", tag: %s"
+            return "page: " & currentPage & ", path: " & documentPath & ", tag:" & "%s"
         end tell
     ]],
     tags.generateTimestampTag()
