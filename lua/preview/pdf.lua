@@ -32,7 +32,7 @@ function M.GetFigPath(path, page)
       },
       on_exit = function(j, return_val)
         if return_val == 0 then
-          vim.notify("PDF page converted successfully", vim.log.levels.INFO)
+          print("PDF page converted successfully")
         else
           print("Error converting PDF page: " .. table.concat(j:stderr_result(), "\n"))
         end
