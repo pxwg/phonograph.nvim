@@ -4,6 +4,9 @@ M.defalut_opts = {
   integration = {
     image = true,
   },
+  -- mark = {
+  --   order = { url.title, pdf.title, pdf.path, pdf.page },
+  -- },
   ui = {
     selection = {
       border = {
