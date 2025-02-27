@@ -2,6 +2,7 @@
 -- keymappings
 local map = vim.keymap.set
 local api = require("utils.api")
+local tags = require("utils.tags")
 
 local M = {}
 
@@ -9,7 +10,6 @@ local M = {}
 function M.get_file_path()
   local buf = vim.api.nvim_get_current_buf()
   local file_path = vim.api.nvim_buf_get_name(buf)
-  -- MARK : hw7.pdf;1;jbyuki/nabla.nvim: take your scientific notes :pencil2: in Neovim
   file_path = file_path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%.", ""):gsub("/", "_")
   return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".txt"
 end
@@ -56,7 +56,6 @@ function M.update_lines(lines, lines_to_insert, pos)
   for _, line in ipairs(lines) do
     local row, col = line:match("{(%d+), (%d+),")
     if row and col and tonumber(row) == pos.row and tonumber(col) == pos.col then
-      -- Remove the matching line and insert new lines
       updated = true
     else
       table.insert(new_lines, line)
@@ -244,12 +243,13 @@ function M.get_all_titles(file_path)
 
   local titles = {}
   for line in file:lines() do
+    local tag = line:match("tag:(%d+)")
     local title = line:match("title:([^,]+)")
     local url = line:match("url:([^\n,]+)}")
     local scrollY = line:match("scrollY:(%d+)")
     local num = line:match("{(%d+),")
     if title then
-      table.insert(titles, { type = "url", pos = num, title = title, scroll = scrollY, url = url })
+      table.insert(titles, { type = "url", pos = num, title = title, scroll = scrollY, url = url, tag = tag })
     end
   end
 
@@ -264,15 +264,15 @@ function M.url_line_to_table(urls)
   if not urls then
     return {}
   end
-
+  local tag = urls:match("tag:(%d+)")
   local title = urls:match("title:([^,]+)")
   local url = urls:match("url:([^\n,]+)}")
   local scrollY = urls:match("scrollY:(%d+)")
   local num = urls:match("{(%d+),")
   if title then
-    return { type = "url", num = num, title = title, pos = scrollY, url = url }
+    return { type = "url", num = num, title = title, pos = scrollY, url = url, tag = tag }
   end
-  return { type = "url", num = "", title = "", pos = "", url = "" }
+  return { type = "url", num = "", title = "", pos = "", url = "", tag = "" }
 end
 
 -- -----keymap for debugging and testing---------
