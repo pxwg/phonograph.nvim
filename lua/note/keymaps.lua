@@ -8,32 +8,38 @@ local ui = require("utils.ui")
 local map = vim.keymap.set
 
 --- adding reading states
+--- Mind model: reading paper -> want to take notes about paper -> want to remember the reading state and reload it while review the note -> use this keymapping
 --- workflow: read -> remember (included saving the reading state and get the figure of current path)
-map("n", "<leader>nn", function()
-  local tab = rem.InsertPDFurl()
+map("n", "<leader>np", function()
+  local tab = rem.InsertPDFurl:pdf()
   if not tab then
     print("Error: rem.InsertPDFurl() returned nil")
     return
   end
-  local pdf = rem.pdf_line_to_table(tab.pdf)
-  local url = rem.url_line_to_table(tab.url)
-  -- for i = 1, #tab do
-  --   if not tab[i] then
-  --     print("Error: tab[" .. i .. "] is nil")
-  --     return
-  --   elseif string.match(tab[i], "%.pdf$") then
-  --     pdf = rem.pdf_line_to_table(tab[i])
-  --   elseif string.match(tab[i], "url:%s+") then
-  --     url = rem.url_line_to_table(tab[i])
-  --   end
-  -- end
+  local pdf = rem.pdf_line_to_table(tab)
+  -- local url = rem.url_line_to_table(tab.url)
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor({ url.title, pdf.title, pdf.path, pdf.page })
+  mark.insert_note_at_cursor({ pdf.title, pdf.page }, "pdf")
 
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)
-end, { noremap = true, silent = true, desc = "[N]ew [n]ote" })
+end, { noremap = true, silent = true, desc = "[N]ew [P]df" })
+
+--- adding reading states
+--- Mind model: reading paper -> want to take notes about paper -> want to remember the reading state and reload it while review the note -> use this keymapping
+--- workflow: read -> remember (included saving the reading state and get the figure of current path)
+map("n", "<leader>nu", function()
+  local tab = rem.InsertPDFurl:url()
+  if not tab then
+    print("Error: rem.InsertPDFurl() returned nil")
+    return
+  end
+  -- local pdf = rem.pdf_line_to_table(tab)
+  local url = rem.url_line_to_table(tab)
+  --- TODO: fully costumizable bookmark
+  mark.insert_note_at_cursor({ url.title, url.url }, "url")
+end, { noremap = true, silent = true, desc = "[N]ew [U]rl" })
 
 --- open pdf reading selection ui
 --- workflow: read -> back to the point of past -> restore the reading state

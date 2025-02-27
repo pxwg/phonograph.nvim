@@ -89,11 +89,44 @@ function M.InsertLinesAtTop(lines_to_insert, pos)
   M.write_file(file_path, updated_lines)
 end
 
-function M.InsertPDFurl()
+M.InsertPDFurl = {}
+
+---@return string|nil
+function M.InsertPDFurl:pdf()
+  local pdf = api.ReturnSkimReadingState()
+
   local pos = vim.api.nvim_win_get_cursor(0)
   pos = { row = pos[1], col = pos[2] }
+
+  if not pdf then
+    vim.notify("Error: No pdf found!", vim.log.levels.ERROR)
+    return nil
+  else
+    M.InsertLinesAtTop({ pdf }, pos)
+    return pdf
+  end
+end
+
+---@return string|nil
+function M.InsertPDFurl:url()
   local url = api.ReturnChormeReadingState()
-  local pdf = api.ReturnSkimReadingState()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  pos = { row = pos[1], col = pos[2] }
+  if not url then
+    vim.notify("Error: No url found!", vim.log.levels.ERROR)
+    return nil
+  else
+    M.InsertLinesAtTop({ url }, pos)
+    return url
+  end
+end
+
+---@return table {pdf: string, url: string}
+function M.InsertPDFurl:insert()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  pos = { row = pos[1], col = pos[2] }
+  local pdf = self:pdf()
+  local url = self:url()
   M.InsertLinesAtTop({ pdf, url }, pos)
   return { pdf = pdf, url = url }
 end
