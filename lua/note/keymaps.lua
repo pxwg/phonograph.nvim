@@ -19,7 +19,7 @@ map("n", "<leader>np", function()
   local pdf = rem.pdf_line_to_table(tab)
   -- local url = rem.url_line_to_table(tab.url)
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor({ pdf.title, pdf.page }, "pdf")
+  mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.page }, "pdf")
 
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
@@ -38,7 +38,7 @@ map("n", "<leader>nu", function()
   -- local pdf = rem.pdf_line_to_table(tab)
   local url = rem.url_line_to_table(tab)
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor({ url.title, url.url }, "url")
+  mark.insert_note_at_cursor({ url.title, url.tag, url.url }, "url")
 end, { noremap = true, silent = true, desc = "[N]ew [U]rl" })
 
 --- open pdf reading selection ui
