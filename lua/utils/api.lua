@@ -1,18 +1,22 @@
 -- api sources for obtaining the reading state of the current tab in Chrome and Skim, and opening the document in Skim to the specified page.
 
+local tags = require("utils.tags")
 local M = {}
 
 --- Get the reading state of the current tab in Chrome
 --- @return string|nil
 function M.ReturnChormeReadingState()
-  local script = [[
+  local script = string.format(
+    [[
         tell application "Google Chrome"
             set currentTab to active tab of front window
             set tabURL to URL of currentTab
             set tabTitle to title of currentTab
-            execute currentTab javascript "({url: window.location.href, title: document.title, scrollY: window.scrollY})"
+            execute currentTab javascript "({url: window.location.href, title: document.title, scrollY: window.scrollY, tag: '%s'})"
         end tell
-    ]]
+    ]],
+    tags.generateTimestampTag()
+  )
   local result = vim.fn.system({ "osascript", "-e", script })
   if result then
     result = result:gsub("%s+$", "")
@@ -27,14 +31,17 @@ end
 --- Get the reading state of the current tab in Skim
 --- @return string|nil
 function M.ReturnSkimReadingState()
-  local script = [[
+  local script = string.format(
+    [[
         tell application "Skim"
             set currentDocument to front document
             set documentPath to path of currentDocument
             set currentPage to get index of current page of currentDocument
-            return "page: " & currentPage & ", path: " & documentPath
+            return "page: " & currentPage & ", path: " & documentPath & ", tag: %s"
         end tell
-    ]]
+    ]],
+    tags.generateTimestampTag()
+  )
   local result = vim.fn.system({ "osascript", "-e", script })
   if result then
     result = result:gsub("%s+$", "")
