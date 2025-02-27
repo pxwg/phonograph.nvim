@@ -28,7 +28,8 @@ map("n", "<leader>nn", function()
   --   end
   -- end
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor(url.title, pdf.title, pdf.path, pdf.page)
+  mark.insert_note_at_cursor({ url.title, pdf.title, pdf.path, pdf.page })
+
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.page)
   end)

@@ -20,10 +20,9 @@ function M.comment_string(input)
 end
 
 --- input the table of bookmarks, return the comment of note
---- @param  ... table The note to be inserted
+--- @param  titles table The note to be inserted
 --- @return nil
-function M.insert_note_at_cursor(...)
-  local titles = { ... }
+function M.insert_note_at_cursor(titles)
   local filtered_args = {}
   for _, arg in ipairs(titles) do
     if arg ~= nil and arg ~= "" then
