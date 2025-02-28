@@ -5,6 +5,8 @@ local cmd = vim.api.nvim_create_autocmd
 local rem = require("utils.rem")
 local search = require("utils.search")
 
+--- TODO: What I need the code to do is: use a regular expression to match {{{type, then find the corresponding tag information, and finally redefine the cursor position in the database by looking up the tag information in the database and the tag information here. This ensures the robustness of the tag system under text restructuring.
+
 --- @param tags table
 --- @return table
 local function get_line_inside(tags)
