@@ -2,10 +2,11 @@
 --- first, we need to get the current tags, which could be realized by saving and update a global table with the current posisions
 --- then, we need to check the change of the marks, then update the global table and the file on ~/.local/state/nvim/note/
 local cmd = vim.api.nvim_create_autocmd
-local fold = require("utils.bookmark_fold")
+local delate = require("utils.delate")
 local note = require("note")
 local rem = require("utils.rem")
 local search = require("utils.search")
+local tags = require("utils.tags")
 
 -- --- @param tags table
 -- --- @return table
@@ -37,7 +38,7 @@ local search = require("utils.search")
 --     else
 --       table.insert(differences.added, value)
 --     end
---   end
+--end
 --
 --   for value, _ in pairs(table1_set) do
 --     table.insert(differences.removed, value)
@@ -80,9 +81,39 @@ local search = require("utils.search")
 --   end,
 -- })
 
+local function get_index_pos(table)
+  return output
+end
+
 cmd("BufWritePre", {
   pattern = "*.md",
   callback = function()
-    fold.fold_paragraphs("pdf", "end")
+    local path = rem.get_file_path()
+
+    local tag_file = tags.get_folded_tags(tags.get_folded_lines())
+    local pdf_base = rem.get_all_pdfs(path)
+    local url_base = rem.get_all_titles(path)
+    local tag_base = {}
+    for _, tag in ipairs(pdf_base) do
+      table.insert(tag_base, tag)
+    end
+    for _, tag in ipairs(url_base) do
+      table.insert(tag_base, tag)
+    end
+
+    local diff = tags.compare_tags(tag_file, tag_base)
+
+    local diff_pos = {}
+    if diff ~= nil then
+      for i = 1, #diff do
+        table.insert(diff_pos, diff[i].num)
+      end
+
+      print("pos in data:" .. vim.inspect(diff_pos))
+
+      if #diff_pos > 0 then
+        delate.delete_lines_in_file(path, diff_pos)
+      end
+    end
   end,
 })

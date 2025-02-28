@@ -7,7 +7,6 @@ local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
 local api = require("utils.api")
-local open = require("utils.open")
 local tags = require("utils.tags")
 
 --- adding reading states
@@ -69,7 +68,7 @@ map("n", "<leader>no", function()
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
   local tag = tags.get_tag_on_line(current_line)
   local path = rem.get_file_path()
-  local line = open.search_from_tag(tag, path)
+  local line = tags.search_from_tag(tag, path)
   if not line then
     vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
     return

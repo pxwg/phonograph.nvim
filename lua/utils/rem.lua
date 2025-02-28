@@ -47,9 +47,10 @@ end
 
 ---@param lines table
 ---@param lines_to_insert table
----@param pos table {row: number, col: number}
+---@param pos table? {row: number, col: number}
 ---@return table
 function M.update_lines(lines, lines_to_insert, pos)
+  pos = pos or { row = "", col = "" }
   local updated = false
   local new_lines = {}
 
@@ -178,7 +179,7 @@ end
 
 --- Parses the file content and returns all paths from lines
 --- Only keeps the content matching 'xxx.pdf'
----@param file_path string {xxx(num),path:xxx,page:xxx}
+---@param file_path string {xxx(num),path:xxx,page:xxx,tag:xxx}
 ---@return table
 function M.get_all_pdfs(file_path)
   local file = io.open(file_path, "r")
