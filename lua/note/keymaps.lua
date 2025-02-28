@@ -8,6 +8,7 @@ local ui = require("utils.ui")
 local map = vim.keymap.set
 local api = require("utils.api")
 local open = require("utils.open")
+local tags = require("utils.tags")
 
 --- adding reading states
 --- Mind model: reading paper -> want to take notes about paper -> want to remember the reading state and reload it while review the note -> use this keymapping
@@ -63,8 +64,10 @@ map("n", "<leader>nr", function()
 end, { noremap = true, silent = true, desc = "[N]ote [R]estore" })
 
 --- open pdf under cursor
+--- workflow: read -> want to back to the point of past -> restore the reading state
 map("n", "<leader>no", function()
-  local tag = open.get_tag_under_cursor()
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+  local tag = tags.get_tag_on_line(current_line)
   local path = rem.get_file_path()
   local line = open.search_from_tag(tag, path)
   if not line then
