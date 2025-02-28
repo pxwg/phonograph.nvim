@@ -44,7 +44,6 @@ function M.insert_note_at_cursor(titles, format)
     error("Filtered arguments cannot be empty")
   end
 
-  print("man" .. vim.inspect(filtered_args))
 
   -- Split the note into lines
   local note_lines = { "{{{" .. format .. ": " .. filtered_args[1] }
