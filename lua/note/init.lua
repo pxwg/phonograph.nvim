@@ -8,7 +8,7 @@ function M.setup(user_opts)
   -- print(vim.inspect(M.opts.ui.selection.border))
 
   require("note.keymaps")
-  -- require("note.autocmd")
+  require("note.autocmd")
 end
 
 return M
