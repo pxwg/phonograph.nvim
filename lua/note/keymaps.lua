@@ -6,6 +6,8 @@ local rem = require("utils.rem")
 local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
+local api = require("utils.api")
+local open = require("utils.open")
 
 --- adding reading states
 --- Mind model: reading paper -> want to take notes about paper -> want to remember the reading state and reload it while review the note -> use this keymapping
@@ -59,3 +61,23 @@ map("n", "<leader>nr", function()
 
   ui.create_selection_window(table1, table2)
 end, { noremap = true, silent = true, desc = "[N]ote [R]estore" })
+
+--- open pdf under cursor
+map("n", "<leader>no", function()
+  local tag = open.get_tag_under_cursor()
+  local path = rem.get_file_path()
+  local line = open.search_from_tag(tag, path)
+  if not line then
+    vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
+    return
+  end
+  if line.type == "pdf" then
+    vim.notify("note.nvim: PDF open!", vim.log.levels.INFO)
+    local pdf = rem.pdf_line_to_table(line.line)
+    api.OpenSkimToReadingState(pdf.page, pdf.path)
+  elseif line.type == "url" then
+    vim.notify("note.nvim: URL open!", vim.log.levels.INFO)
+    local url = rem.url_line_to_table(line.line)
+    api.OpenUntilReady(url.url, url.ScrollY)
+  end
+end, { noremap = true, silent = true, desc = "[N]ote [O]pen" })
