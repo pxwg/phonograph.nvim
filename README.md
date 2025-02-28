@@ -1,6 +1,6 @@
 # 🎶*phonograph.nvim*: Echoes of Flowing Text
 
-<p align="center"><a href="./readme/zh_cn.md">简体中文</a></p>
+> <p align="center"><a href="./readme/zh_cn.md">简体中文</a></p>
 
 ## Introduction
 
