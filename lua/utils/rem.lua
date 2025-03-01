@@ -14,6 +14,14 @@ function M.get_file_path()
   return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".txt"
 end
 
+---@return string
+function M.get_db_path()
+  local buf = vim.api.nvim_get_current_buf()
+  local file_path = vim.api.nvim_buf_get_name(buf)
+  file_path = file_path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%.", ""):gsub("/", "_")
+  return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".sqlite"
+end
+
 ---@param file_path string
 ---@return table
 function M.read_file(file_path)
@@ -194,12 +202,12 @@ function M.get_all_pdfs(file_path)
       local path = line:match("path: ([^,]+)")
       local page = line:match("page: (%d+)")
       local num = line:match("{(%d+),")
-      local tag = line:match("tag:(%d+)}") -- 修改此行以正确提取 tag 后的数字
+      local tag = line:match("tag:(%d+)}")
       if path and num then
         -- Extract the part matching 'xxx.pdf'
         local extracted_path = path:match(".+/([^/]+%.pdf)")
         if extracted_path then
-          table.insert(paths, { type = "pdf", pos = num, title = extracted_path, page = page, path = path, tag = tag })
+          table.insert(paths, { type = "pdf", col = num, title = extracted_path, pos = page, path = path, tag = tag })
         end
       end
     end
