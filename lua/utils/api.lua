@@ -1,5 +1,7 @@
 -- api sources for obtaining the reading state of the current tab in Chrome and Skim, and opening the document in Skim to the specified page.
+-- TODO: Rewrite the file system with sqlite.lua
 
+local sqlite = require("sqlite")
 local tags = require("utils.tags")
 local M = {}
 
@@ -37,7 +39,7 @@ function M.ReturnSkimReadingState()
             set currentDocument to front document
             set documentPath to path of currentDocument
             set currentPage to get index of current page of currentDocument
-            return "page: " & currentPage & ", path: " & documentPath & ", tag:" & "%s"
+            return "pos: " & currentPage & ", path: " & documentPath & ", tag:" & "%s"
         end tell
     ]],
     tags.generateTimestampTag()
