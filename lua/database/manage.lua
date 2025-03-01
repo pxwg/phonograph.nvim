@@ -39,6 +39,13 @@ function custom_entries:add(entry)
   custom_entries:insert(entry)
 end
 
+--- Function to get entries by tag
+---@param tag number
+---@return table
+function custom_entries:get_by_tag(tag)
+  return custom_entries:where({ tag = tag })
+end
+
 --- Function to update an entry by tag
 ---@param tag number
 ---@param updates table tables you want to update
@@ -49,16 +56,9 @@ function custom_entries:update_by_tag(tag, updates)
   })
 end
 
---- Function to update an entry by tag
----@param tag number
----@param updates table
-function custom_entries:update_entry_by_tag(tag, updates)
-  custom_entries:update_by_tag(tag, updates)
-end
-
---- Function to get entries by tag
----@param tag number
----@return table
-function custom_entries:get_by_tag(tag)
-  return custom_entries:where({ tag = tag })
+--- Function to delete an entry by tag
+--- @param tag number
+--- @return boolean
+function custom_entries:delete_by_tag(tag)
+  return custom_entries:remove({ { tag = tag } })
 end
