@@ -4,13 +4,14 @@ local uri = require("utils.rem").get_db_path()
 local julianday, strftime = sqlite.lib.julianday, sqlite.lib.strftime
 
 -- Define a new table for storing the data
+-- the data is the reading history of the user, included
 ---@class CustomEntryTable: sqlite_tbl
----@field path string
----@field pos string
----@field title string
----@field col number
----@field type string
----@field tag number
+---@field path string the path of original object (e.g. pdf path/website url)
+---@field pos string the reading position in original object while adding the entry into db
+---@field title string the title of original object
+---@field col number the reading position in note while adding the entry into db
+---@field type string the type of original object (e.g. "pdf", "url")
+---@field tag number the unique tag of the entry
 
 ---@type CustomEntryTable
 local custom_entries = tbl("custom_entries", {
