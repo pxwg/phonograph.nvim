@@ -1,11 +1,15 @@
 local M = {}
 
 --- Generate a timestamp tag
---- @return string timestamp tag
+--- @return number timestamp tag
 function M.generateTimestampTag()
   local date = os.date("*t")
-  return string.format("%04d%02d%02d%02d%02d%02d", date.year, date.month, date.day, date.hour, date.min, date.sec)
+  local out = vim.fn.str2nr(
+    string.format("%04d%02d%02d%02d%02d%02d", date.year, date.month, date.day, date.hour, date.min, date.sec)
+  )
+  return out
 end
+
 
 --- Get the tag under the cursor -- Open the file under the cursor
 --- @param current_line number the current line number

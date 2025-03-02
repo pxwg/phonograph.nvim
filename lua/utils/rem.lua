@@ -2,7 +2,10 @@
 -- keymappings
 local map = vim.keymap.set
 local api = require("utils.api")
+local data = require("utils.data")
+local paths = require("utils.path")
 local tags = require("utils.tags")
+local log_root = vim.fn.expand("$HOME") .. "/.local/state/nvim/note/"
 
 local M = {}
 
@@ -12,14 +15,6 @@ function M.get_file_path()
   local file_path = vim.api.nvim_buf_get_name(buf)
   file_path = file_path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%.", ""):gsub("/", "_")
   return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".txt"
-end
-
----@return string
-function M.get_db_path()
-  local buf = vim.api.nvim_get_current_buf()
-  local file_path = vim.api.nvim_buf_get_name(buf)
-  file_path = file_path:gsub("^%s+", ""):gsub("%s+$", ""):gsub("%.", ""):gsub("/", "_")
-  return vim.fn.expand("$HOME") .. "/.local/state/nvim/note/" .. file_path .. ".sqlite"
 end
 
 ---@param file_path string
@@ -102,15 +97,27 @@ M.InsertPDFurl = {}
 ---@return string|nil
 function M.InsertPDFurl:pdf()
   local pdf = api.ReturnSkimReadingState()
+  local pdf_table = M.pdf_line_to_table(pdf)
 
   local pos = vim.api.nvim_win_get_cursor(0)
   pos = { row = pos[1], col = pos[2] }
+  local col = tonumber(pos.row)
+
+  local tag = tags.generateTimestampTag()
+  local db_path = paths.get_db_path()
+
+  data.create_tbl(db_path)
 
   if not pdf then
     vim.notify("Error: No pdf found!", vim.log.levels.ERROR)
     return nil
   else
-    M.InsertLinesAtTop({ pdf }, pos)
+    -- M.InsertLinesAtTop({ pdf }, pos)
+    data.add_tbl(
+      db_path,
+      "history",
+      { path = pdf_table.path, type = "pdf", pos = pdf_table.pos, title = pdf_table.title, col = col, tag = tag }
+    )
     return pdf
   end
 end
@@ -118,13 +125,27 @@ end
 ---@return string|nil
 function M.InsertPDFurl:url()
   local url = api.ReturnChormeReadingState()
+  local url_table = M.url_line_to_table(url)
+
   local pos = vim.api.nvim_win_get_cursor(0)
   pos = { row = pos[1], col = pos[2] }
+  local col = tonumber(pos.row)
+
+  local tag = tags.generateTimestampTag()
+  local db_path = paths.get_db_path()
+
+  data.create_tbl(db_path)
+
   if not url then
     vim.notify("Error: No url found!", vim.log.levels.ERROR)
     return nil
   else
-    M.InsertLinesAtTop({ url }, pos)
+    -- M.InsertLinesAtTop({ url }, pos)
+    data.add_tbl(
+      db_path,
+      "history",
+      { path = url_table.url, type = "url", pos = url_table.pos, title = url_table.title, col = col, tag = tag }
+    )
     return url
   end
 end
@@ -218,7 +239,7 @@ function M.get_all_pdfs(file_path)
 end
 
 --- Transfer single pdf line to a table element
---- @param line string {xxx(num),path:xxx,page:xxx}
+--- @param line string|nil {xxx(num),path:xxx,page:xxx}
 --- @return table
 function M.pdf_line_to_table(line)
   if not line then
@@ -232,12 +253,12 @@ function M.pdf_line_to_table(line)
 
   path = path:gsub("^%s+", ""):gsub("%s+$", "")
   local tag = line:match("tag:(%d+)")
-  local page = line:match("page: (%d+)")
+  local pos = line:match("pos: (%d+)")
   if path then
     local extracted_path = path:match(".+/([^/]+%.pdf)")
 
     if extracted_path then
-      return { type = "pdf", title = extracted_path, page = page, path = path, tag = tag }
+      return { typs = "pdf", title = extracted_path, pos = pos, path = path, tag = tag }
     end
   end
   return { type = "pdf", title = "", page = "", path = "", tag = "" }
@@ -278,7 +299,7 @@ function M.url_line_to_table(urls)
   end
   local tag = urls:match("tag:(%d+),")
   local title = urls:match("title:([^,]+)")
-  local url = urls:match("url:([^\n,]+)}")
+  local url = urls:match("url:([^\n,]+)")
   local scrollY = urls:match("scrollY:(%d+)")
   local num = urls:match("{(%d+),")
   if title then
