@@ -10,7 +10,6 @@ function M.generateTimestampTag()
   return out
 end
 
-
 --- Get the tag under the cursor -- Open the file under the cursor
 --- @param current_line number the current line number
 --- @return table tag
