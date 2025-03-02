@@ -1,12 +1,12 @@
 -- api sources for obtaining the reading state of the current tab in Chrome and Skim, and opening the document in Skim to the specified page.
 -- TODO: Rewrite the file system with sqlite.lua
 
-local sqlite = require("sqlite")
-local tags = require("utils.tags")
 local M = {}
+local tags = require("utils.tags")
+-- local udb = require("utils.db")
 
 --- Get the reading state of the current tab in Chrome
---- @return string|nil
+--- @return string
 function M.ReturnChormeReadingState()
   local script = string.format(
     [[
@@ -26,7 +26,7 @@ function M.ReturnChormeReadingState()
     return result
   else
     print("Failed to record reading state.")
-    return nil
+    return ""
   end
 end
 
@@ -45,6 +45,7 @@ function M.ReturnSkimReadingState()
     tags.generateTimestampTag()
   )
   local result = vim.fn.system({ "osascript", "-e", script })
+
   if result then
     result = result:gsub("%s+$", "")
     print(result)
@@ -72,6 +73,7 @@ function M.OpenSkimToReadingState(page, path)
     page
   )
   local result = vim.fn.system({ "osascript", "-e", script })
+
   if result then
     print("Opened document to specified page.")
   else
