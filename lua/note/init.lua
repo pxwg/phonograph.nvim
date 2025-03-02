@@ -9,6 +9,7 @@ function M.setup(user_opts)
 
   require("note.keymaps")
   require("note.autocmd")
+  require("utils.db")
 end
 
 return M
