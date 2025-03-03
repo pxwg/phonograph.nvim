@@ -1,3 +1,5 @@
+-- TODO: add safety check for the keymapping to prevent the destruction of the database
+--
 -- deafult workflows with keymapping
 local icon = require("icons")
 local mark = require("utils.bookmark")
@@ -71,22 +73,25 @@ end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
 --- open pdf reading selection ui
 --- workflow: read -> back to the point of past -> restore the reading state
 map("n", "<leader>pr", function()
-  local path = rem.get_file_path()
-  local db_path = paths.get_db_path()
+  if not paths.check_db_file_exists() then
+    vim.notify("note.nvim: Database does not exist!", vim.log.levels.ERROR)
+  else
+    local db_path = paths.get_db_path()
 
-  -- local table1 = rem.get_all_pdfs(path)
-  -- local table2 = rem.get_all_titles(path)
+    -- local table1 = rem.get_all_pdfs(path)
+    -- local table2 = rem.get_all_titles(path)
 
-  local table1 = data.read_tbl_with_selection(db_path, { where = { type = "pdf" } })
-  local table2 = data.read_tbl_with_selection(db_path, { where = { type = "url" } })
+    local table1 = data.read_tbl_with_selection(db_path, { where = { type = "pdf" } })
+    local table2 = data.read_tbl_with_selection(db_path, { where = { type = "url" } })
 
-  local pos = vim.api.nvim_win_get_cursor(0)
+    local pos = vim.api.nvim_win_get_cursor(0)
 
-  local indPDF = sel.GenerateIndex(table1)
-  local indTitle = sel.GenerateIndex(table2)
+    local indPDF = sel.GenerateIndex(table1)
+    local indTitle = sel.GenerateIndex(table2)
 
-  table1 = sel.SortTablebyDistance(indPDF, table1, pos[1])
-  table2 = sel.SortTablebyDistance(indTitle, table2, pos[1])
+    table1 = sel.SortTablebyDistance(indPDF, table1, pos[1])
+    table2 = sel.SortTablebyDistance(indTitle, table2, pos[1])
 
-  ui.create_selection_window(table1, table2)
+    ui.create_selection_window(table1, table2)
+  end
 end, { noremap = true, silent = true, desc = "[P]hono [R]estore" })
