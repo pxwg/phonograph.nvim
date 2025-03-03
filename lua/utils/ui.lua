@@ -30,8 +30,8 @@ local function update_pdf_preview(current_table)
   local fig_path_tab = {}
   for i = 1, #current_table do
     local path = current_table[i].path
-    local pos = current_table[i].pos
-    fig_path_tab[i] = pdf_preview.TransFigPath(path, pos)
+    local tag = current_table[i].tag
+    fig_path_tab[i] = pdf_preview.TransFigPath(path, tag)
   end
   return fig_path_tab
 end
