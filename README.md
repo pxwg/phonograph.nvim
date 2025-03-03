@@ -25,7 +25,7 @@ The purpose of this plugin is to achieve the above functionality. Currently, it 
 ```lua
 return {
   "pxwg/phonograph.nvim",
-  branch = "sqlite_re", -- Optional sqlite support for better data management ⚠️ beta branch, may have some bugs and destroy your restorted reading state
+  branch = "feature", -- Optional sqlite support for better data management ⚠️ beta branch, may have some bugs and destroy your restorted reading state
   dependencies = {
     "MunifTanjim/nui.nvim",
     { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview
