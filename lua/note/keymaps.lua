@@ -7,6 +7,8 @@ local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
 local api = require("utils.api")
+local data = require("utils.data")
+local paths = require("utils.path")
 local tags = require("utils.tags")
 
 --- adding reading states
@@ -83,3 +85,26 @@ map("n", "<leader>po", function()
     api.OpenUntilReady(url.url, url.ScrollY)
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
+
+--- open pdf reading selection ui
+--- workflow: read -> back to the point of past -> restore the reading state
+map("n", "<leader>pr", function()
+  local path = rem.get_file_path()
+  local db_path = paths.get_db_path()
+
+  -- local table1 = rem.get_all_pdfs(path)
+  -- local table2 = rem.get_all_titles(path)
+
+  local table1 = data.read_tbl_with_selection(db_path, { where = { type = "pdf" } })
+  local table2 = data.read_tbl_with_selection(db_path, { where = { type = "url" } })
+
+  local pos = vim.api.nvim_win_get_cursor(0)
+
+  local indPDF = sel.GenerateIndex(table1)
+  local indTitle = sel.GenerateIndex(table2)
+
+  table1 = sel.SortTablebyDistance(indPDF, table1, pos[1])
+  table2 = sel.SortTablebyDistance(indTitle, table2, pos[1])
+
+  ui.create_selection_window(table1, table2)
+end, { noremap = true, silent = true, desc = "[P]hono [R]estore" })
