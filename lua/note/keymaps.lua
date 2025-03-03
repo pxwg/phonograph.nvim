@@ -24,10 +24,10 @@ map("n", "<leader>pp", function()
   end
   local pdf = rem.pdf_line_to_table(tab)
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.page }, "pdf")
+  mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.pos }, "pdf")
 
   vim.schedule(function()
-    prev_pdf.GetFigPath(pdf.path, pdf.pos)
+    prev_pdf.GetFigPath(pdf.path, pdf.pos, pdf.tag)
   end)
 end, { noremap = true, silent = true, desc = "[P]hono [P]df" })
 

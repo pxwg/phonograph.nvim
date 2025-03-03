@@ -3,16 +3,17 @@ local M = {}
 local image = require("image")
 
 --- @param path string
+--- @param tag number|string
 --- @param page number
 --- @return string
-function M.GetFigPath(path, page)
-  if not path or not page then
+function M.GetFigPath(path, page, tag)
+  if not page and not path and not tag then
     return ""
   end
 
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")
   local fig_path =
-    string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, page)
+    string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, tag)
   require("plenary.job")
     :new({
       command = "pdftoppm",
@@ -43,10 +44,12 @@ function M.GetFigPath(path, page)
   return vim.fn.trim(fig_path)
 end
 
-function M.TransFigPath(path, page)
+--- @param path string
+--- @param tag number|string
+function M.TransFigPath(path, tag)
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")
   local fig_path =
-    string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, page)
+    string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, tag)
   local abs_fig_path = vim.fn.system(string.format('realpath "%s.png"', fig_path))
   return vim.fn.trim(abs_fig_path)
 end
