@@ -45,7 +45,6 @@ map("n", "<leader>pu", function()
   mark.insert_note_at_cursor({ url.title, url.tag, url.url }, "url")
 end, { noremap = true, silent = true, desc = "[P]hono [U]rl" })
 
-
 --- open pdf under cursor
 --- workflow: read -> want to back to the point of past -> restore the reading state
 map("n", "<leader>po", function()
