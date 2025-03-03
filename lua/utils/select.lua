@@ -9,7 +9,7 @@ function M.GenerateIndex(tbl)
   local indices = {}
   if tbl then
     for _, entry in ipairs(tbl) do
-      table.insert(indices, entry.pos) -- Use the num value as the index
+      table.insert(indices, entry.col) -- Use the num value as the index
     end
   end
   return indices
