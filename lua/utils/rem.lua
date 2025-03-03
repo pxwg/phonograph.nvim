@@ -98,12 +98,12 @@ M.InsertPDFurl = {}
 function M.InsertPDFurl:pdf()
   local pdf = api.ReturnSkimReadingState()
   local pdf_table = M.pdf_line_to_table(pdf)
+  print("pdf" .. vim.inspect(pdf_table))
 
   local pos = vim.api.nvim_win_get_cursor(0)
   pos = { row = pos[1], col = pos[2] }
   local col = tonumber(pos.row)
 
-  local tag = tags.generateTimestampTag()
   local db_path = paths.get_db_path()
 
   data.create_tbl(db_path)
@@ -112,12 +112,16 @@ function M.InsertPDFurl:pdf()
     vim.notify("Error: No pdf found!", vim.log.levels.ERROR)
     return nil
   else
-    -- M.InsertLinesAtTop({ pdf }, pos)
-    data.add_tbl(
-      db_path,
-      "history",
-      { path = pdf_table.path, type = "pdf", pos = pdf_table.pos, title = pdf_table.title, col = col, tag = tag }
-    )
+    M.InsertLinesAtTop({ pdf }, pos)
+
+    data.add_tbl(db_path, "history", {
+      path = pdf_table.path,
+      type = "pdf",
+      pos = pdf_table.pos,
+      title = pdf_table.title,
+      col = col,
+      tag = pdf_table.tag,
+    })
     return pdf
   end
 end
@@ -131,7 +135,6 @@ function M.InsertPDFurl:url()
   pos = { row = pos[1], col = pos[2] }
   local col = tonumber(pos.row)
 
-  local tag = tags.generateTimestampTag()
   local db_path = paths.get_db_path()
 
   data.create_tbl(db_path)
@@ -140,12 +143,15 @@ function M.InsertPDFurl:url()
     vim.notify("Error: No url found!", vim.log.levels.ERROR)
     return nil
   else
-    -- M.InsertLinesAtTop({ url }, pos)
-    data.add_tbl(
-      db_path,
-      "history",
-      { path = url_table.url, type = "url", pos = url_table.pos, title = url_table.title, col = col, tag = tag }
-    )
+    M.InsertLinesAtTop({ url }, pos)
+    data.add_tbl(db_path, "history", {
+      path = url_table.url,
+      type = "url",
+      pos = url_table.pos,
+      title = url_table.title,
+      col = col,
+      tag = url_table.tag,
+    })
     return url
   end
 end
@@ -217,7 +223,7 @@ function M.get_all_pdfs(file_path)
     return {}
   end
 
-  local paths = {}
+  local paths_table = {}
   for line in file:lines() do
     if line:match("page:") then
       local path = line:match("path: ([^,]+)")
@@ -228,7 +234,10 @@ function M.get_all_pdfs(file_path)
         -- Extract the part matching 'xxx.pdf'
         local extracted_path = path:match(".+/([^/]+%.pdf)")
         if extracted_path then
-          table.insert(paths, { type = "pdf", col = num, title = extracted_path, pos = page, path = path, tag = tag })
+          table.insert(
+            paths_table,
+            { type = "pdf", col = num, title = extracted_path, pos = page, path = path, tag = tag }
+          )
         end
       end
     end

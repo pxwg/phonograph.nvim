@@ -41,6 +41,18 @@ function M.create_tbl(path)
   end)
 end
 
+--- Read a table in the database
+--- @param path string the path to the database
+--- @return table|nil
+function M.read_tbl(path)
+  local BM = connect_to_db(path)
+  local result = nil
+  BM:with_open(path, function()
+    result = BM:select("history")
+  end)
+  return result
+end
+
 --- Add a table to the database
 --- @param path string the path to the database
 --- @param tbl_name string the name of the table
@@ -55,7 +67,7 @@ end
 --- Modify a table in the database
 ---@param path string the path to the database
 ---@param tbl_name string the name of the table
----@param tag number
+---@param tag number the tag of the table you want to update
 ---@param updates table tables you want to update
 ---@example custom_entries:update_by_tag(1, {col = 2})
 function M.update_tbl_by_tag(path, tbl_name, tag, updates)
@@ -88,5 +100,12 @@ function M.delete_tbl_by_tag(path, tbl_name, tag)
     BM:delete(tbl_name, { where = { tag = tag } })
   end)
 end
+
+-- M.update_tbl_by_tag(
+--   "/Users/pxwg-dogggie/.local/state/nvim/note/_Users_pxwg-dogggie_Downloads_testmd.sqlite",
+--   "history",
+--   250922106,
+--   { col = 2 }
+-- )
 
 return M

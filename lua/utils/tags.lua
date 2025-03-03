@@ -1,13 +1,24 @@
 local M = {}
 
+math.randomseed(os.time() + os.clock() * 1000000 + tonumber(tostring({}):sub(8)))
+---
 --- Generate a timestamp tag
---- @return number timestamp tag
+--- @return number? timestamp tag
 function M.generateTimestampTag()
   local date = os.date("*t")
-  local out = vim.fn.str2nr(
-    string.format("%04d%02d%02d%02d%02d%02d", date.year, date.month, date.day, date.hour, date.min, date.sec)
+  local random_number = math.random(10, 99)
+  local out = string.format(
+    "%02d%02d%02d%02d%02d%02d%02d",
+    date.year % 100,
+    date.hour,
+    date.sec,
+    date.min,
+    random_number,
+    date.month,
+    date.day
   )
-  return out
+  print(tonumber(string.sub(out, 1, 9)))
+  return tonumber(string.sub(out, 1, 9)) -- 截取前9位
 end
 
 --- Get the tag under the cursor -- Open the file under the cursor
@@ -17,7 +28,7 @@ function M.get_tag_on_line(current_line)
   local current_line_content = vim.api.nvim_buf_get_lines(0, current_line - 1, current_line, false)[1]
 
   if not current_line_content:find("{{{") then
-    return { tag = nil, type = nil }
+    return { tag = nil, type = nil, col = nil }
   end
 
   local first_letter = current_line_content:match("%a+")
@@ -28,9 +39,9 @@ function M.get_tag_on_line(current_line)
   local number = line_content:match("%d+")
 
   if number then
-    return { tag = number, type = first_letter }
+    return { tag = number, type = first_letter, col = current_line }
   else
-    return { tag = nil, type = first_letter }
+    return { tag = nil, type = first_letter, col = current_line }
   end
 end
 
@@ -72,7 +83,7 @@ function M.get_folded_lines()
 end
 
 --- Get all the tags in the folded lines
---- @param folded_lines table the folded lines
+--- @param folded_lines table the table folded lines
 --- @return table the tags in the folded lines
 function M.get_folded_tags(folded_lines)
   local output = {}
@@ -113,17 +124,73 @@ function M.compare_tags(tags1, tags2)
   for i = 1, #tags2 do
     local found = false
     for j = 1, #tags1 do
-      if tags2[i].tag == tags1[j].tag then
+      if tonumber(tags2[i].tag) == tonumber(tags1[j].tag) then
         found = true
         break
       end
     end
     if not found then
-      table.insert(output2, { tag = tags2[i], num = i })
+      table.insert(output2, { tag = tags2[i].tag, num = i })
     end
   end
 
   return output2
+end
+
+M.compare_tags_sql = {}
+
+function M.compare_tags_sql:diff2(tags1, tags2)
+  local output2 = {}
+
+  for i = 1, #tags2 do
+    local found = false
+    for j = 1, #tags1 do
+      if tonumber(tags2[i].tag) == tonumber(tags1[j].tag) then
+        found = true
+        break
+      end
+    end
+    if not found then
+      table.insert(output2, tags2[i])
+    end
+  end
+
+  return output2
+end
+
+function M.compare_tags_sql:diff1(tags1, tags2)
+  local output1 = {}
+
+  for i = 1, #tags1 do
+    local found = false
+    for j = 1, #tags2 do
+      if tonumber(tags1[i].tag) == tonumber(tags2[j].tag) then
+        found = true
+        break
+      end
+    end
+    if not found then
+      table.insert(output1, tags1[i])
+    end
+  end
+
+  return output1
+end
+
+function M.compare_tags_sql:same(tags1, tags2)
+  local output_1 = {}
+  local output_2 = {}
+
+  for i = 1, #tags1 do
+    for j = 1, #tags2 do
+      if tonumber(tags1[i].tag) == tonumber(tags2[j].tag) then
+        table.insert(output_1, tags1[i])
+        table.insert(output_2, tags2[j])
+      end
+    end
+  end
+
+  return { same_1 = output_1, same_2 = output_2 }
 end
 
 --- Get the tag line
