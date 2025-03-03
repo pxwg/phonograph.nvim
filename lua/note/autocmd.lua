@@ -85,12 +85,16 @@ local function get_index_pos(table)
 end
 
 --- FIX: Only sqlite supperted in this branch
+--- FIX: Only callback while the tag exists in the file
 cmd("BufWritePre", {
   pattern = "*.md",
   callback = function()
     -- local path = rem.get_file_path()
 
     local tag_file = tags.get_folded_tags(tags.get_folded_lines())
+    if #tag_file == 0 then
+      return
+    end
     -- print("tag_file:" .. vim.inspect(tag_file))
     -- local pdf_base = rem.get_all_pdfs(path)
     -- local url_base = rem.get_all_titles(path)
@@ -118,7 +122,7 @@ cmd("BufWritePre", {
 
     local same_db = tags.compare_tags_sql:same(tag_file, bd_tbl).same_1
 
-    print("same_db:" .. vim.inspect(same_db))
+    -- print("same_db:" .. vim.inspect(same_db))
     if #same_db > 0 then
       for i = 1, #same_db do
         if same_db[i].tag and same_db[i].col then
