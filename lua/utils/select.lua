@@ -17,11 +17,14 @@ end
 
 --- Sorts the table based on the distance of indices to a given number x
 --- @param indices number[] Array of indices
---- @param tbl table The table to be sorted
+--- @param tbl table|nil The table to be sorted
 --- @param x number The reference number to calculate distance
 --- @return table The sorted table
 function M.SortTablebyDistance(indices, tbl, x)
   -- Create a table of {index, value} pairs
+  if not tbl then
+    return {}
+  end
   local indexed_tbl = {}
   for i, idx in ipairs(indices) do
     table.insert(indexed_tbl, { index = idx, value = tbl[i] })
