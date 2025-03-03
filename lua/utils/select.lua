@@ -2,13 +2,15 @@
 
 local M = {}
 
---- Generates an index table based on the input table
---- @param tbl table The input table with elements { "pdf", num, extracted_path }
+--- Generate an index table from a table
+--- @param tbl table|nil The table to be indexed
 --- @return number[] The index table
 function M.GenerateIndex(tbl)
   local indices = {}
-  for _, entry in ipairs(tbl) do
-    table.insert(indices, entry.pos) -- Use the num value as the index
+  if tbl then
+    for _, entry in ipairs(tbl) do
+      table.insert(indices, entry.pos) -- Use the num value as the index
+    end
   end
   return indices
 end

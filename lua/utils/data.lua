@@ -53,6 +53,19 @@ function M.read_tbl(path)
   return result
 end
 
+--- Read a table in the database with selection
+--- @param path string the path to the database
+--- @param selection table the selection you want to read {where = {xxx= xxx}}
+--- @return table|nil
+function M.read_tbl_with_selection(path, selection)
+  local BM = connect_to_db(path)
+  local result = nil
+  BM:with_open(path, function()
+    result = BM:select("history", selection)
+  end)
+  return result
+end
+
 --- Add a table to the database
 --- @param path string the path to the database
 --- @param tbl_name string the name of the table
