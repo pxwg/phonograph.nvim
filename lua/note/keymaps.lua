@@ -21,12 +21,11 @@ map("n", "<leader>pp", function()
     return
   end
   local pdf = rem.pdf_line_to_table(tab)
-  -- local url = rem.url_line_to_table(tab.url)
   --- TODO: fully costumizable bookmark
   mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.page }, "pdf")
 
   vim.schedule(function()
-    prev_pdf.GetFigPath(pdf.path, pdf.page)
+    prev_pdf.GetFigPath(pdf.path, pdf.pos)
   end)
 end, { noremap = true, silent = true, desc = "[P]hono [P]df" })
 
@@ -39,7 +38,6 @@ map("n", "<leader>pu", function()
     print("Error: rem.InsertPDFurl() returned nil")
     return
   end
-  -- local pdf = rem.pdf_line_to_table(tab)
   local url = rem.url_line_to_table(tab)
   --- TODO: fully costumizable bookmark
   mark.insert_note_at_cursor({ url.title, url.tag, url.url }, "url")
@@ -49,21 +47,24 @@ end, { noremap = true, silent = true, desc = "[P]hono [U]rl" })
 --- workflow: read -> want to back to the point of past -> restore the reading state
 map("n", "<leader>po", function()
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local tag = tags.get_tag_on_line(current_line)
-  local path = rem.get_file_path()
-  local line = tags.search_from_tag(tag, path)
+  -- local tag = tags.get_tag_on_line(current_line)
+  -- local path = rem.get_file_path()
+  -- local line = tags.search_from_tag(tag, path)
+  local db_path = paths.get_db_path()
+  local line = data.read_tbl_with_selection(db_path, { where = { col = current_line } })[1]
+
+  print(vim.inspect(line))
+
   if not line then
     vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
     return
   end
   if line.type == "pdf" then
     vim.notify("note.nvim: PDF open!", vim.log.levels.INFO)
-    local pdf = rem.pdf_line_to_table(line.line)
-    api.OpenSkimToReadingState(pdf.page, pdf.path)
+    api.OpenSkimToReadingState(line.pos, line.path)
   elseif line.type == "url" then
     vim.notify("note.nvim: URL open!", vim.log.levels.INFO)
-    local url = rem.url_line_to_table(line.line)
-    api.OpenUntilReady(url.url, url.ScrollY)
+    api.OpenUntilReady(line.path, line.pos)
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
 
