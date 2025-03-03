@@ -25,13 +25,15 @@ The purpose of this plugin is to achieve the above functionality. Currently, it 
 ```lua
 return {
   "pxwg/phonograph.nvim",
+  branch = "sqlite_re", -- Optional sqlite support for better data management ⚠️ beta branch, may have some bugs and destroy your restorted reading state
   dependencies = {
     "MunifTanjim/nui.nvim",
     { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview
+    { "kkharji/sqlite.lua"}, -- Optional sqlite support while choose `sqlite_re` branch
     opts = {
       -- default options
       integration = {
-        image = true, -- optional image support in pdf preview, requires `3rd/image.nvim`
+        image = true, -- optional image support in pdf preview, requires `3rd/image.nvim` and it's dependencies
       },
       -- ui is fully customizable based on nui.nvim
       ui = {
@@ -87,7 +89,7 @@ return {
 
 This note-taking plugin is still under development, and there are many features that need to be completed. Here are some features I consider important:
 
-* Use an SQLite database instead of a self-built database to better achieve data IO(⭐very important!);
+* Use an SQLite database instead of a self-built database to better achieve data IO (⭐very important! Finished with [sqlite.lua](https://github.com/kkharji/sqlite.lua) in beta branch [phonograph: sqlite_re](https://github.com/pxwg/phonograph.nvim/tree/sqlite_re), may have some bugs);
 
 * Automatically update the reading state database following the current file format to ensure that the reading state can be correctly tracked when restructuring note files (tracking reading state deletion: ✅; tracking reading state restructuring: ❌);
 
