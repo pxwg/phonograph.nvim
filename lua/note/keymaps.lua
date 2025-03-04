@@ -55,7 +55,7 @@ map("n", "<leader>po", function()
   local db_path = paths.get_db_path()
   local line = data.read_tbl_with_selection(db_path, { where = { col = current_line } })[1]
 
-  print(vim.inspect(line))
+  -- print(vim.inspect(line))
 
   if not line then
     vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
