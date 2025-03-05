@@ -1,4 +1,4 @@
-local cmd = vim.api.nvim_create_autocmd
+local autocmd = vim.api.nvim_create_autocmd
 local data = require("utils.data")
 local db_path = require("utils.path")
 local delate = require("utils.delate")
@@ -86,31 +86,15 @@ end
 
 --- FIX: Only sqlite supperted in this branch
 --- FIX: Only callback while the tag exists in the file
-cmd("BufWritePre", {
+autocmd("BufWritePost", {
   pattern = "*.md",
   callback = function()
     -- local path = rem.get_file_path()
-
-    local tag_file = tags.get_folded_tags(tags.get_folded_lines())
-    if #tag_file == 0 then
-      return
-    end
-    -- print("tag_file:" .. vim.inspect(tag_file))
-    -- local pdf_base = rem.get_all_pdfs(path)
-    -- local url_base = rem.get_all_titles(path)
-    -- local tag_base = {}
-    -- for _, tag in ipairs(pdf_base) do
-    --   table.insert(tag_base, tag)
-    -- end
-    -- for _, tag in ipairs(url_base) do
-    --   table.insert(tag_base, tag)
-    -- end
+    local tag_file = tags.get_folded_tags(tags.get_folded_lines()) or {}
 
     local bd_tbl = data.read_tbl(db_path.get_db_path())
 
     local diff_db = tags.compare_tags_sql:diff2(tag_file, bd_tbl)
-
-    -- print("diff_db:" .. vim.inspect(diff_db))
 
     if diff_db ~= nil then
       if #diff_db > 0 then
@@ -130,20 +114,5 @@ cmd("BufWritePre", {
         end
       end
     end
-    --
-    -- local diff = tags.compare_tags(tag_file, tag_base)
-    --
-    -- local diff_pos = {}
-    -- if diff ~= nil then
-    --   for i = 1, #diff do
-    --     table.insert(diff_pos, diff[i].num)
-    --   end
-    --
-    --   -- print("pos in data:" .. vim.inspect(diff_pos))
-    --
-    --   if #diff_pos > 0 then
-    --     delate.delete_lines_in_file(path, diff_pos)
-    --   end
-    -- end
   end,
 })
