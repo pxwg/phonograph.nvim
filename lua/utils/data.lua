@@ -33,8 +33,11 @@ local history = {
 }
 
 --- Create a table in the database
---- @param path string the path to the database
+--- @param path string|nil the path to the database
 function M.create_tbl(path)
+  if not path then
+    return
+  end
   local BM = connect_to_db(path)
   BM:with_open(path, function()
     BM:create("history", history)
