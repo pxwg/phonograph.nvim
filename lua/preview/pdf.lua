@@ -95,20 +95,4 @@ function M.ClearPDFwithPage(fig_path, windows, ind, size)
     :clear()
 end
 
--- --- test example
---
--- local path = vim.fn.expand(
---   "~/Desktop/大二班团事业/寒假_情系母校/2024-2025“雅望南归”寒假回访计划（V0111).pdf"
--- )
--- local page = 1
--- local fig_path = M.GetFigPath(path, page)
--- local windows = vim.api.nvim_get_current_win()
--- local width = vim.api.nvim_win_get_width(windows) / 10
--- local height = vim.api.nvim_win_get_height(windows) / 10
--- local size = { width = width, height = height }
---
--- -- M.PreviewPDFwithPage(fig_path, windows, 1, size)
---
--- M.ClearPDFwithPage(fig_path, windows, 1, size)
-
 return M
