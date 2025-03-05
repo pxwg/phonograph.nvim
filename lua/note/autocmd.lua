@@ -89,12 +89,12 @@ end
 autocmd("BufWritePost", {
   pattern = "*.md",
   callback = function()
-    -- local path = rem.get_file_path()
     local tag_file = tags.get_folded_tags(tags.get_folded_lines()) or {}
 
+    data.create_tbl(db_path.get_db_path())
     local bd_tbl = data.read_tbl(db_path.get_db_path())
-
     local diff_db = tags.compare_tags_sql:diff2(tag_file, bd_tbl)
+    local same_db = tags.compare_tags_sql:same(tag_file, bd_tbl).same_1
 
     if diff_db ~= nil then
       if #diff_db > 0 then
@@ -103,8 +103,6 @@ autocmd("BufWritePost", {
         end
       end
     end
-
-    local same_db = tags.compare_tags_sql:same(tag_file, bd_tbl).same_1
 
     -- print("same_db:" .. vim.inspect(same_db))
     if #same_db > 0 then
