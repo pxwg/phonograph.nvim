@@ -7,35 +7,64 @@ local rem = require("utils.rem")
 local search = require("utils.search")
 local tags = require("utils.tags")
 
-local function get_index_pos(table)
-  return output
+local function get_buffer_lines()
+  local line_count = vim.api.nvim_buf_line_count(0)
+  local lines = vim.api.nvim_buf_get_lines(0, 0, line_count, false)
+  return lines
+end
+
+local function get_buffer_line_numbers()
+  local line_count = vim.api.nvim_buf_line_count(0)
+  local line_numbers = {}
+  for i = 1, line_count do
+    table.insert(line_numbers, i)
+  end
+  return line_numbers
 end
 
 --- FIX: Only sqlite supperted in this branch
 --- FIX: Only callback while the tag exists in the file
+---TODO: Add inverse database searching
 autocmd("BufWritePost", {
-  pattern = "*.md",
+  pattern = "*",
   callback = function()
-    local tag_file = tags.get_folded_tags(tags.get_folded_lines()) or {}
+    ---  WARN: Dangerous! The mistaken delation of bookmarks would delate the related data in database. So we need to add some inverse adding mechanism.
+    --- WARN: This function would be slow if the file is too large. Rewrite it with a better algorithm.
+    local folded_tags = tags.get_folded_tags(get_buffer_line_numbers()) or {}
 
     data.create_tbl(db_path.get_db_path())
-    local bd_tbl = data.read_tbl(db_path.get_db_path())
-    local diff_db = tags.compare_tags_sql:diff2(tag_file, bd_tbl)
-    local same_db = tags.compare_tags_sql:same(tag_file, bd_tbl).same_1
+    local database_table = data.read_tbl(db_path.get_db_path())
+    local tags_to_delete = tags.compare_tags_sql:diff2(folded_tags, database_table)
+    local tags_to_update = tags.compare_tags_sql:same(folded_tags, database_table).same_1
+    local tags_to_add = tags.compare_tags_sql:diff1(folded_tags, database_table)
 
-    if diff_db ~= nil then
-      if #diff_db > 0 then
-        for i = 1, #diff_db do
-          data.delete_tbl_by_tag(db_path.get_db_path(), "history", diff_db[i].tag)
+    if tags_to_delete ~= nil then
+      if #tags_to_delete > 0 then
+        for i = 1, #tags_to_delete do
+          data.delete_tbl_by_tag(db_path.get_db_path(), "history", tags_to_delete[i].tag)
         end
       end
     end
 
-    -- print("same_db:" .. vim.inspect(same_db))
-    if #same_db > 0 then
-      for i = 1, #same_db do
-        if same_db[i].tag and same_db[i].col then
-          data.update_tbl_by_tag(db_path.get_db_path(), "history", same_db[i].tag, { col = same_db[i].col })
+    if #tags_to_update > 0 then
+      for i = 1, #tags_to_update do
+        if tags_to_update[i].tag and tags_to_update[i].col then
+          data.update_tbl_by_tag(db_path.get_db_path(), "history", tags_to_update[i].tag, { col = tags_to_update[i].col })
+        end
+      end
+    end
+
+    if #tags_to_add > 0 then
+      for i = 1, #tags_to_add do
+        if tags_to_add[i].tag and tags_to_add[i].col then
+          data.add_tbl(db_path.get_db_path(), "history", {
+            type = tags_to_add[i].type,
+            tag = tags_to_add[i].tag,
+            path = tags_to_add[i].path,
+            title = tags_to_add[i].title,
+            col = tags_to_add[i].col,
+            pos = "1",
+          })
         end
       end
     end
