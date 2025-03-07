@@ -1,3 +1,4 @@
+local bm = require("utils.bookmark")
 local M = {}
 
 math.randomseed(os.time() + os.clock() * 1000000 + tonumber(tostring({}):sub(8)))
@@ -23,25 +24,31 @@ end
 
 --- Get the tag under the cursor -- Open the file under the cursor
 --- @param current_line number the current line number
---- @return table tag
+--- @return table
 function M.get_tag_on_line(current_line)
   local current_line_content = vim.api.nvim_buf_get_lines(0, current_line - 1, current_line, false)[1]
 
   if not current_line_content:find("{{{") then
-    return { tag = nil, type = nil, col = nil }
+    return { tag = nil, type = nil, col = nil, path = nil }
   end
 
   local first_letter = current_line_content:match("%a+")
   local target_line = current_line + 2
+  local title_line = current_line + 1
 
   local line_content = vim.api.nvim_buf_get_lines(0, target_line - 1, target_line, false)[1]
 
   local number = line_content:match("%d+")
+  local comment_line_content = vim.api.nvim_buf_get_lines(0, current_line + 2, current_line + 3, false)[1]
+  local comment_line_content_title = vim.api.nvim_buf_get_lines(0, title_line - 1, title_line, false)[1]
+  local path = bm.uncomment_string(comment_line_content)
+  local title = bm.uncomment_string(comment_line_content_title)
+  -- local comment_string = comment_line_content:match("<!--%s*(.-)%s*-->")
 
   if number then
-    return { tag = number, type = first_letter, col = current_line }
+    return { tag = number, type = first_letter, col = current_line, path = path, title = title }
   else
-    return { tag = nil, type = first_letter, col = current_line }
+    return { tag = nil, type = first_letter, col = current_line, path = path, title = title }
   end
 end
 
@@ -68,13 +75,18 @@ function M.search_from_tag(tag, path)
   end
 end
 
+function M.is_fold_line(line_number)
+  local line = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
+  return line:match("{{{")
+end
+
 --- @return table the line numbers in the current buffer
 function M.get_folded_lines()
   local folded_lines = {}
   local total_lines = vim.api.nvim_buf_line_count(0)
 
   for line = 1, total_lines do
-    if vim.fn.foldclosed(line) == line then
+    if M.is_fold_line(line) == line then
       table.insert(folded_lines, line)
     end
   end
@@ -118,6 +130,10 @@ function M.get_tag_on_line_base(tags, path)
   return output
 end
 
+---Compare the tags
+---@param tags1 any
+---@param tags2 any
+---@return table
 function M.compare_tags(tags1, tags2)
   local output2 = {}
 

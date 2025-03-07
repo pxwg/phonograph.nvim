@@ -83,7 +83,6 @@ map("n", "<leader>pr", function()
 
     local table1 = data.read_tbl_with_selection(db_path, { where = { type = "pdf" } })
     local table2 = data.read_tbl_with_selection(db_path, { where = { type = "url" } })
-
     local pos = vim.api.nvim_win_get_cursor(0)
 
     local indPDF = sel.GenerateIndex(table1)
