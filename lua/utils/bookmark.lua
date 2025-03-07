@@ -3,7 +3,9 @@ local M = {}
 --- @return string ... The comment string
 local function get_comment_string()
   local commentstring = vim.bo.commentstring
+  -- print(commentstring)
   if commentstring == "" then
+    --- FIX: hard-coded comment string for LaTeX
     commentstring = "// %s"
     --- latex "% %s" could not be formatted
   elseif vim.bo.filetype == "tex" then
@@ -11,6 +13,29 @@ local function get_comment_string()
   end
   return commentstring
 end
+
+--- @param commented_string string The string with comment
+--- @return string The uncommented string
+local function uncomment_string(commented_string)
+  --- FIX: hard-coded comment string for html comment in markdown
+  if commented_string:match("^<!%-%-") and commented_string:match("%-%->$") then
+    local uncommented = commented_string:gsub("^<!%-%-", ""):gsub("%-%->$", "")
+    uncommented = uncommented:gsub("^%s+", ""):gsub("%s+$", "")
+    return uncommented
+  end
+
+  local commentstring = get_comment_string()
+  if not commentstring:find("%%s") then
+    commentstring = commentstring .. " %s"
+  end
+
+  local escaped_commentstring = commentstring:gsub("%%", "%%%%"):gsub("%s", "%%s")
+  local uncommented = commented_string:gsub("^" .. escaped_commentstring:format(""), "")
+  uncommented = uncommented:gsub("^%s+", "")
+  return uncommented
+end
+
+M.uncomment_string = uncomment_string
 
 --- @param input table The input table whose strings are to be commented
 --- @return table ... The table with each string commented
@@ -21,6 +46,16 @@ function M.comment_string(input)
     table.insert(commented_table, commentstring:format(item))
   end
   return commented_table
+end
+
+--- @param input table The input table whose strings are to be uncommented
+--- @return table ... The table with each string uncommented
+function M.uncomment_string_table(input)
+  local uncommented_table = {}
+  for i = 1, #input do
+    table.insert(uncommented_table, uncomment_string(input[i]))
+  end
+  return uncommented_table
 end
 
 --- input the table of bookmarks, return the comment of note
@@ -41,7 +76,7 @@ function M.insert_note_at_cursor(titles, format)
   end
 
   if #filtered_args == 0 then
-    error("Filtered arguments cannot be empty")
+    vim.notify("Filtered arguments cannot be empty", vim.LOG.ERROR)
   end
 
   -- Split the note into lines
