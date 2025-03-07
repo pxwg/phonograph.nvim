@@ -13,11 +13,11 @@ end
 
 -- Define a new table for storing the data
 -- the data is the reading history of the user, included
----@class HistoryEntryTable: sqlite_tbl
----@field path string|nil the path of original object (e.g. pdf path/website url)
----@field pos string the reading position in original object while adding the entry into db
+---@class HistoryEntryTable
+---@field path string the path of original object (e.g. pdf path/website url)
+---@field pos string? the reading position in original object while adding the entry into db
 ---@field title string the title of original object
----@field col number the reading position in note while adding the entry into db
+---@field col number? the reading position in note while adding the entry into db
 ---@field type string the type of original object (e.g. "pdf", "url")
 ---@field tag number the unique tag of the entry
 
@@ -27,7 +27,7 @@ local history = {
   pos = "integer",
   title = "text",
   col = "integer",
-  type = "text",
+  type = { "text", required = true },
   tag = { "integer", required = true },
   ensure = true, -- create table if it doesn't already exists (THIS IS DEFUAULT)
 }
@@ -69,7 +69,7 @@ function M.read_tbl_with_selection(path, selection)
   return result
 end
 
---- Add a table to the database
+--- Insert a data(table element) to the table in the database
 --- @param path string the path to the database
 --- @param tbl_name string the name of the table
 --- @param tbl_insert HistoryEntryTable the table you want to add

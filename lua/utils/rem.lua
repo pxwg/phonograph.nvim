@@ -98,7 +98,6 @@ M.InsertPDFurl = {}
 function M.InsertPDFurl:pdf()
   local pdf = api.ReturnSkimReadingState()
   local pdf_table = M.pdf_line_to_table(pdf)
-  print("pdf" .. vim.inspect(pdf_table))
 
   local pos = vim.api.nvim_win_get_cursor(0)
   pos = { row = pos[1], col = pos[2] }
@@ -112,17 +111,24 @@ function M.InsertPDFurl:pdf()
     vim.notify("Error: No pdf found!", vim.log.levels.ERROR)
     return nil
   else
-    M.InsertLinesAtTop({ pdf }, pos)
+    -- M.InsertLinesAtTop({ pdf }, pos)
 
-    data.add_tbl(db_path, "history", {
-      path = pdf_table.path,
-      type = "pdf",
-      pos = pdf_table.pos,
-      title = pdf_table.title,
-      col = col,
-      tag = pdf_table.tag,
-    })
-    return pdf
+    local inserted, result = pcall(function()
+      data.add_tbl(db_path, "history", {
+        path = pdf_table.path,
+        type = "pdf",
+        pos = pdf_table.pos,
+        title = pdf_table.title,
+        col = col,
+        tag = pdf_table.tag,
+      })
+    end)
+    if inserted then
+      return pdf
+    else
+      vim.notify("phonograh.nvim: Failed to get reading state", vim.log.levels.ERROR)
+      return pdf
+    end
   end
 end
 
@@ -143,16 +149,23 @@ function M.InsertPDFurl:url()
     vim.notify("Error: No url found!", vim.log.levels.ERROR)
     return nil
   else
-    M.InsertLinesAtTop({ url }, pos)
-    data.add_tbl(db_path, "history", {
-      path = url_table.url,
-      type = "url",
-      pos = url_table.pos,
-      title = url_table.title,
-      col = col,
-      tag = url_table.tag,
-    })
-    return url
+    -- M.InsertLinesAtTop({ url }, pos)
+    local inserted, result = pcall(function()
+      data.add_tbl(db_path, "history", {
+        path = url_table.url,
+        type = "url",
+        pos = url_table.pos,
+        title = url_table.title,
+        col = col,
+        tag = url_table.tag,
+      })
+    end)
+    if inserted then
+      return url
+    else
+      vim.notify("phonograh.nvim: Failed to get reading state", vim.log.levels.ERROR)
+      return url
+    end
   end
 end
 
@@ -316,29 +329,5 @@ function M.url_line_to_table(urls)
   end
   return { type = "url", num = "", title = "", pos = "", url = "", tag = "" }
 end
-
--- -----keymap for debugging and testing---------
---
--- map("n", "<leader>nf", function()
---   M.OpenPDFAndURL()
--- end, { noremap = true, silent = true, desc = "Extract and print file info" })
---
--- local function print_table(pdfs)
---   for _, entry in ipairs(pdfs) do
---     print(string.format('{"%s", %s, "%s", "%s"}', entry[1], entry[2], entry[3], entry[4]))
---   end
--- end
---
--- map("n", "<leader>np", function()
---   local file_path = M.get_file_path()
---   local pdfs = M.get_all_pdfs(file_path)
---   print_table(pdfs)
--- end, { noremap = true, silent = true, desc = "Extract and print pdfs" })
---
--- map("n", "<leader>nu", function()
---   local file_path = M.get_file_path()
---   local urls = M.get_all_titles(file_path)
---   print_table(urls)
--- end, { noremap = true, silent = true, desc = "Extract and print urls" })
 
 return M
