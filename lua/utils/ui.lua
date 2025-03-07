@@ -221,7 +221,7 @@ function M.create_selection_window(...)
   end
 
   if #non_empty_tables == 0 then
-    print("No data to show")
+    vim.notify("phonograh.nvim: No data to show", vim.log.levels.WARN)
     return
   end
 
