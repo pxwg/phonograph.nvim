@@ -89,6 +89,8 @@ return {
 
 * 集成 [snacks.image](./https://github.com/folke/snacks.nvim/blob/main/docs/image.md) 以获得最佳的图片显示效果 (⭐非常重要！❌)；
 
+* 添加单元测试❌；
+
 * 自动跟随当前文件格式更新阅读状态数据库，保证在重构笔记文件时能够正确地跟踪阅读状态 (跟踪阅读状态的删除：✅；跟踪阅读状态的重构：✅)；
 
 * 与[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) 等主流的 picker 联合使用，编写相应的图像处理封装 (目前已经为 telescope 实现，但还没有封装❌)，使得我们可以将自己最熟悉的插件用于笔记撰写，而不是适应一个新的查找窗口；
