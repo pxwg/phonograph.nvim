@@ -22,13 +22,10 @@ local function get_buffer_line_numbers()
   return line_numbers
 end
 
---- FIX: Only sqlite supperted in this branch
 --- FIX: Only callback while the tag exists in the file
----TODO: Add inverse database searching
 autocmd("BufWritePost", {
   pattern = "*",
   callback = function()
-    ---  WARN: Dangerous! The mistaken delation of bookmarks would delate the related data in database. So we need to add some inverse adding mechanism.
     --- WARN: This function would be slow if the file is too large. Rewrite it with a better algorithm.
     local folded_tags = tags.get_folded_tags(get_buffer_line_numbers()) or {}
 
@@ -49,7 +46,12 @@ autocmd("BufWritePost", {
     if #tags_to_update > 0 then
       for i = 1, #tags_to_update do
         if tags_to_update[i].tag and tags_to_update[i].col then
-          data.update_tbl_by_tag(db_path.get_db_path(), "history", tags_to_update[i].tag, { col = tags_to_update[i].col })
+          data.update_tbl_by_tag(
+            db_path.get_db_path(),
+            "history",
+            tags_to_update[i].tag,
+            { col = tags_to_update[i].col }
+          )
         end
       end
     end
