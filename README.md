@@ -91,7 +91,9 @@ This note-taking plugin is still under development, and there are many features 
 
 * Use an SQLite database instead of a self-built database to better achieve data IO (⭐very important! Finished with [sqlite.lua](https://github.com/kkharji/sqlite.lua) in main branch, may have some bugs ✅);
 
-* Add [snacks.image](./https://github.com/folke/snacks.nvim/blob/main/docs/image.md) support for the best image display experience ❌. 
+* Add [snacks.image](./https://github.com/folke/snacks.nvim/blob/main/docs/image.md) support for the best image display experience ❌; 
+
+* Add unit tests ❌;
 
 * Automatically update the reading state database following the current file format to ensure that the reading state can be correctly tracked when restructuring note files (tracking reading state deletion: ✅; tracking reading state restructuring: ✅);
 
