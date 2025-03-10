@@ -2,7 +2,7 @@
 
 > <p align="center"><a href="./readme/zh_cn.md">简体中文</a></p>
 
-## Introduction
+## Introduction 📖
 
 We often need to take notes while reading papers or websites, and these notes can sometimes be handwritten or electronic. Handwritten notes can easily facilitate annotations. Annotations refer to a mode of association between the text being read and the text being recorded.
 
@@ -19,17 +19,18 @@ When we transcribe these handwritten notes, or poetically speaking—"flowing te
 
 The purpose of this plugin is to achieve the above functionality. Currently, it supports the `chrome` browser and `skim` reader (as these are the two readers I use) on MacOS (based on AppleScript). I look forward to supporting more platforms and software in the future (see [TODO](#todo)).
 
-## Installation
+## Installation 📦
 
-> lazy.nvim
+<details>
+<summary>lazy.nvim</summary>
+
 ```lua
 return {
   "pxwg/phonograph.nvim",
-  branch = "feature", -- Optional sqlite support for better data management ⚠️ alpha branch, may have some bugs and destroy your restorted reading state
   dependencies = {
-    "MunifTanjim/nui.nvim",
+    { "MunifTanjim/nui.nvim" },
+    { "kkharji/sqlite.lua" },
     { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview
-    { "kkharji/sqlite.lua"}, -- Optional sqlite support while choose `sqlite_re` branch
     opts = {
       -- default options
       integration = {
@@ -85,7 +86,9 @@ return {
 }
 ```
 
-## TODO
+</details>
+
+## TODO 🤔
 
 This note-taking plugin is still under development, and there are many features that need to be completed. Here are some features I consider important:
 
@@ -93,7 +96,7 @@ This note-taking plugin is still under development, and there are many features 
 
 * Add [snacks.image](./https://github.com/folke/snacks.nvim/blob/main/docs/image.md) support for the best image display experience ❌; 
 
-* Add unit tests ❌;
+* Add unit tests ❌, add specific types ❌;
 
 * Automatically update the reading state database following the current file format to ensure that the reading state can be correctly tracked when restructuring note files (tracking reading state deletion: ✅; tracking reading state restructuring: ✅);
 

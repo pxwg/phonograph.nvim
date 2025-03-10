@@ -17,4 +17,17 @@ function M.get_type(table)
   return result
 end
 
+--- Get the icons with highlight
+--- @param icon_type string
+--- @return string 带颜色的图标
+function M.get_colored_icon(icon_type)
+  if icon_type == "pdf" then
+    return "%#IconPdf#" .. M.icons.pdf .. "%*"
+  elseif icon_type == "url" then
+    return "%#IconUrl#" .. M.icons.url .. "%*"
+  else
+    return ""
+  end
+end
+
 return M
