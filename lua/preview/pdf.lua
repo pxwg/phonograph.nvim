@@ -10,7 +10,6 @@ function M.GetFigPath(path, page, tag)
   if not page and not path and not tag and type(tag) ~= "number" then
     return ""
   end
-
   local extracted_path = vim.fn.fnamemodify(path, ":t:r")
   local fig_path =
     string.format(vim.fn.expand("$HOME") .. "/.local/state/nvim/note/fig/%s_page_%d", extracted_path, tonumber(tag))
