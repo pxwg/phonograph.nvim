@@ -74,7 +74,7 @@ end
 --- @param tbl_name string the name of the table
 --- @param tbl_insert HistoryEntryTable the table you want to add
 function M.add_tbl(path, tbl_name, tbl_insert)
-  print(vim.inspect(tbl_insert))
+  -- print(vim.inspect(tbl_insert))
   if not tbl_insert.path then
     return
   else

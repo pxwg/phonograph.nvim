@@ -84,10 +84,10 @@ function M.PreviewPDFwithPage(fig_path, windows, ind, size, inline)
       inline = inline,
 
       -- geometry (optional)
-      x = 1,
-      y = 1,
-      width = size.width,
-      height = size.height,
+      -- x = 1,
+      -- y = 1,
+      width = size.width - 1,
+      height = size.height - 1,
     }, {})
     :render()
 end
@@ -111,8 +111,8 @@ function M.ClearPDFwithPage(fig_path, windows, ind, size, inline)
       inline = inline,
 
       -- geometry (optional)
-      x = 1,
-      y = 1,
+      -- x = 1,
+      -- y = 1,
       width = size.width,
       height = size.height,
     }, {})
