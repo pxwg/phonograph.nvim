@@ -1,6 +1,6 @@
 # 🎶*phonograph.nvim*: 流动文字的回音
 
-## 介绍
+## 介绍 📖
 
 我们在阅读论文的过程中常常需要记录相应的笔记，这些笔记有时候是手写的、有时候是电子的。手写笔记可以很方便地实现批注。所谓批注，即一种被阅读文本与记录文本的关联模式。
 
@@ -17,19 +17,22 @@
 
 这个插件的目的就是实现上述功能。目前可以实现对`chorme` 浏览器以及 `skim` 阅读器的支持 (因为这是本人使用的两款阅读器)，在 MacOS 环境使用 (基于 applescript)。期待之后可以实现更多平台、更多软件的使用 (见[TODO](#todo))。
 
-## 安装
+## 安装 🛠
 
-> lazy.nvim
+<details>
+<summary>lazy.nvim</summary>
+
 ```lua
 return {
   "pxwg/phonograph.nvim",
   dependencies = {
-    "MunifTanjim/nui.nvim",
+    { "MunifTanjim/nui.nvim" },
+    { "kkharji/sqlite.lua" },
     { "3rd/image.nvim", lazy = true, build = true }, -- Optional image support in pdf preview
     opts = {
       -- default options
       integration = {
-        image = true, -- optional image support in pdf preview, requires `3rd/image.nvim`
+        image = true, -- optional image support in pdf preview, requires `3rd/image.nvim` and it's dependencies
       },
       -- ui is fully customizable based on nui.nvim
       ui = {
@@ -81,7 +84,9 @@ return {
 }
 ```
 
-## TODO
+</details>
+
+## TODO 🤔
 
 目前本笔记插件还处于开发状态，还有大量没有实现的功能亟需完善。这里列出一些我认为比较重要的功能：
 
@@ -89,7 +94,7 @@ return {
 
 * 集成 [snacks.image](./https://github.com/folke/snacks.nvim/blob/main/docs/image.md) 以获得最佳的图片显示效果 (⭐非常重要！❌)；
 
-* 添加单元测试❌；
+* 添加单元测试❌，添加特定的类型❌；
 
 * 自动跟随当前文件格式更新阅读状态数据库，保证在重构笔记文件时能够正确地跟踪阅读状态 (跟踪阅读状态的删除：✅；跟踪阅读状态的重构：✅)；
 
