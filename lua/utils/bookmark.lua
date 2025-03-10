@@ -63,11 +63,6 @@ end
 --- @param format string The type of the input string
 --- @return nil
 function M.insert_note_at_cursor(titles, format)
-  if not titles or #titles == 0 then
-    vim.notify("note.nvim: Titles cannot be nil or empty!", vim.log.levels.ERROR)
-    return
-  end
-
   local filtered_args = {}
   for _, arg in ipairs(titles) do
     if arg ~= nil and arg ~= "" then
@@ -76,7 +71,8 @@ function M.insert_note_at_cursor(titles, format)
   end
 
   if #filtered_args == 0 then
-    vim.notify("Filtered arguments cannot be empty", vim.LOG.ERROR)
+    vim.notify("Filtered arguments cannot be empty", vim.log.levels.ERROR)
+    return
   end
 
   -- Split the note into lines
