@@ -60,7 +60,7 @@ end
 
 --- input the table of bookmarks, return the comment of note
 --- @param  titles table The note to be inserted
--- - @param format pdf|url|String The type of the input string
+--- @param format string The type of the input string
 --- @return nil
 function M.insert_note_at_cursor(titles, format)
   if not titles or #titles == 0 then

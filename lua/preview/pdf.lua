@@ -33,9 +33,12 @@ function M.GetFigPath(path, page, tag)
       },
       on_exit = function(j, return_val)
         if return_val == 0 then
-          print("PDF page converted successfully")
+          vim.notify("phonograph.nvim: PDF page converted successfully", vim.log.levels.INFO)
         else
-          print("Error converting PDF page: " .. table.concat(j:stderr_result(), "\n"))
+          vim.notify(
+            "phonograph.nvim: Error converting PDF page: " .. table.concat(j:stderr_result(), "\n"),
+            vim.log.levels.ERROR
+          )
         end
       end,
     })
