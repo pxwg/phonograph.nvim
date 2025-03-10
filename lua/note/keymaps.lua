@@ -70,29 +70,6 @@ map("n", "<leader>po", function()
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
 
-map("n", "<leader>po", function()
-  local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  -- local tag = tags.get_tag_on_line(current_line)
-  -- local path = rem.get_file_path()
-  -- local line = tags.search_from_tag(tag, path)
-  local db_path = paths.get_db_path()
-  local line = data.read_tbl_with_selection(db_path, { where = { col = current_line } })[1]
-
-  -- print(vim.inspect(line))
-
-  if not line then
-    vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
-    return
-  end
-  if line.type == "pdf" then
-    vim.notify("note.nvim: PDF open!", vim.log.levels.INFO)
-    api.OpenSkimToReadingState(line.pos, line.path)
-  elseif line.type == "url" then
-    vim.notify("note.nvim: URL open!", vim.log.levels.INFO)
-    api.OpenUntilReady(line.path, line.pos)
-  end
-end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
-
 map("n", "<C-LeftMouse>", function()
   local mouse_pos = vim.fn.getmousepos()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -127,7 +104,7 @@ map("n", "<leader>pe", function()
   local db_path = paths.get_db_path()
   local line = data.read_tbl_with_selection(db_path, { where = { col = current_line } })[1]
   local tag = line.tag
-  print(tag)
+  -- print(tag)
 
   if not line then
     vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
