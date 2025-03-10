@@ -93,8 +93,15 @@ map("n", "<leader>po", function()
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
 
-map("n", "<LeftMouse>", function()
+map("n", "<C-LeftMouse>", function()
   local mouse_pos = vim.fn.getmousepos()
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  if mouse_pos.winid == 0 or mouse_pos.winid ~= vim.fn.win_getid() then
+    vim.cmd("normal! <LeftMouse>")
+    return
+  end
+
   vim.api.nvim_win_set_cursor(0, { mouse_pos.line, mouse_pos.column })
 
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
