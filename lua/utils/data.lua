@@ -16,7 +16,7 @@ end
 ---@class HistoryEntryTable
 ---@field path string the path of original object (e.g. pdf path/website url)
 ---@field pos string? the reading position in original object while adding the entry into db
----@field title string the title of original object
+---@field title string? the title of original object
 ---@field col number? the reading position in note while adding the entry into db
 ---@field type string the type of original object (e.g. "pdf", "url")
 ---@field tag number the unique tag of the entry
@@ -74,10 +74,15 @@ end
 --- @param tbl_name string the name of the table
 --- @param tbl_insert HistoryEntryTable the table you want to add
 function M.add_tbl(path, tbl_name, tbl_insert)
-  local BM = connect_to_db(path)
-  BM:with_open(path, function()
-    BM:insert(tbl_name, tbl_insert)
-  end)
+  -- print(vim.inspect(tbl_insert))
+  if not tbl_insert.path then
+    return
+  else
+    local BM = connect_to_db(path)
+    BM:with_open(path, function()
+      BM:insert(tbl_name, tbl_insert)
+    end)
+  end
 end
 
 --- Modify a table in the database

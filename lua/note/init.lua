@@ -10,6 +10,7 @@ function M.setup(user_opts)
   require("note.keymaps")
   require("note.autocmd")
   require("utils.db")
+  require("utils.paste")
 end
 
 return M

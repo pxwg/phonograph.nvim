@@ -127,7 +127,7 @@ function M.InsertPDFurl:pdf()
       return pdf
     else
       vim.notify("phonograh.nvim: Failed to get reading state", vim.log.levels.ERROR)
-      return pdf
+      return ""
     end
   end
 end
