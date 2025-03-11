@@ -24,7 +24,7 @@ map("n", "<leader>pp", function()
   end
   local pdf = rem.pdf_line_to_table(tab)
   --- TODO: fully costumizable bookmark
-  mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.pos }, "pdf")
+  mark.insert_note_at_cursor({ pdf.title, pdf.tag, pdf.pos, pdf.path }, "pdf")
 
   vim.schedule(function()
     prev_pdf.GetFigPath(pdf.path, pdf.pos, pdf.tag)
@@ -58,14 +58,14 @@ map("n", "<leader>po", function()
   -- print(vim.inspect(line))
 
   if not line then
-    vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
+    vim.notify("phonograph.nvim: No history found", vim.log.levels.ERROR)
     return
   end
   if line.type == "pdf" then
-    vim.notify("note.nvim: PDF open!", vim.log.levels.INFO)
+    vim.notify("phonograph.nvim: PDF open!", vim.log.levels.INFO)
     api.OpenSkimToReadingState(line.pos, line.path)
   elseif line.type == "url" then
-    vim.notify("note.nvim: URL open!", vim.log.levels.INFO)
+    vim.notify("phonograph.nvim: URL open!", vim.log.levels.INFO)
     api.OpenUntilReady(line.path, line.pos)
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
@@ -89,34 +89,36 @@ map("n", "<C-LeftMouse>", function()
     return
   end
   if line.type == "pdf" then
-    vim.notify("note.nvim: PDF open!", vim.log.levels.INFO)
+    vim.notify("phonograph.nvim: PDF open!", vim.log.levels.INFO)
     api.OpenSkimToReadingState(line.pos, line.path)
   elseif line.type == "url" then
-    vim.notify("note.nvim: URL open!", vim.log.levels.INFO)
+    vim.notify("phonograph.nvim: URL open!", vim.log.levels.INFO)
     api.OpenUntilReady(line.path, line.pos)
   end
 end, { noremap = true, silent = true, desc = "[P]hono [O]pen" })
 
 --- edit the history in database
---- workflow: change the reading state -> edit the rading state with the keymapping.
+--- NOTE: workflow: change the reading state -> edit the rading state with the keymapping.
+--- TODO: change the editing method: update the tag of the existed line, and define the current preview figure of PDF, instead of updating the figure for the same tag
+--- TODO: add bookmark api to match the reconstruction
 map("n", "<leader>pe", function()
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
   local db_path = paths.get_db_path()
+  --- NOTE: we can use this way to find wheather a folded line is a bookmark or not
   local line = data.read_tbl_with_selection(db_path, { where = { col = current_line } })[1]
   local tag = line.tag
-  -- print(tag)
 
   if not line then
-    vim.notify("note.nvim: No history found", vim.log.levels.ERROR)
+    vim.notify("phonograph.nvim: No history in this line", vim.log.levels.ERROR)
     return
   end
   if line.type == "pdf" then
     local tab = api.ReturnSkimReadingState()
-    if not tab then
-      vim.notify("Error: rem.InsertPDFurl() returned nil", vim.log.levels.ERROR)
+    local pdf = rem.pdf_line_to_table(tab)
+    if not pdf then
+      vim.notify("phonograph.nvim: No pdf", vim.log.levels.ERROR)
       return
     end
-    local pdf = rem.pdf_line_to_table(tab)
     data.update_tbl_by_tag(db_path, "history", tag, { pos = tostring(pdf.pos) })
     vim.schedule(function()
       prev_pdf.GetFigPath(pdf.path, pdf.pos, tag)
@@ -129,7 +131,7 @@ end, { noremap = true, silent = true, desc = "[P]hono [U]pdate" })
 --- workflow: read -> back to the point of past via chosing the reading states -> restore the reading state
 map("n", "<leader>pr", function()
   if not paths.check_db_file_exists() then
-    vim.notify("note.nvim: Database does not exist!", vim.log.levels.ERROR)
+    vim.notify("phonograph.nvim: Database does not exist!", vim.log.levels.ERROR)
   else
     local db_path = paths.get_db_path()
 
