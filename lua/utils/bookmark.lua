@@ -1,3 +1,4 @@
+local prev_pdf = require("preview.pdf")
 local M = {}
 
 --- @return string ... The comment string
@@ -60,9 +61,10 @@ end
 
 --- input the table of bookmarks, return the comment of note
 --- @param  titles table The note to be inserted
---- @param format string The type of the input string
+--- @param type string The type of the input string
 --- @return nil
-function M.insert_note_at_cursor(titles, format)
+function M.insert_note_at_cursor(titles, type)
+  local path = titles[4] or ""
   local filtered_args = {}
   for _, arg in ipairs(titles) do
     if arg ~= nil and arg ~= "" then
@@ -76,13 +78,24 @@ function M.insert_note_at_cursor(titles, format)
   end
 
   -- Split the note into lines
-  local note_lines = { "{{{" .. format .. ": " .. filtered_args[1] }
+  local note_lines = { "{{{" .. type .. ": " .. filtered_args[1] }
   for _, arg in ipairs(filtered_args) do
     table.insert(note_lines, arg)
   end
   table.insert(note_lines, "}}}")
 
   local comment_line = M.comment_string(note_lines)
+
+  --- TODO: figure out why there is not trail e.g. ".png" in the path filtered_args[3]
+  if vim.bo.filetype == "markdown" and type == "pdf" then
+    local fig_path = prev_pdf.GetFigPath(path, filtered_args[3], filtered_args[2])
+    if fig_path ~= "" then
+      table.insert(comment_line, "![](" .. fig_path .. ".png)")
+    end
+  end
+  if vim.bo.filetype == "markdown" and type == "url" then
+    table.insert(comment_line, "[](" .. filtered_args[3] .. ")")
+  end
 
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local row = cursor_pos[1]
