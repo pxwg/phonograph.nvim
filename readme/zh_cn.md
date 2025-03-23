@@ -86,6 +86,17 @@ return {
 
 </details>
 
+## 命令 🔧
+
+| 命令 | 描述 |
+| --- | --- |
+| `:PhonographInsertPdf` | 在光标位置插入 PDF 阅读状态。捕获当前 PDF 页面并创建可折叠书签。 |
+| `:PhonographInsertUrl` | 在光标位置插入 URL 阅读状态。捕获当前网页并创建可折叠书签。 |
+| `:PhonographOpen` | 打开与当前光标位置关联的阅读状态（PDF 或 URL）。 |
+| `:PhonographMouseOpen` | 打开鼠标点击位置的阅读状态。适用于用鼠标快速打开书签。 |
+| `:PhonographEdit` | 使用当前阅读状态更新光标位置的现有书签。 |
+| `:PhonographReview` | 打开所有已保存阅读状态的 UI 界面，允许在 PDF 和 URL 之间进行选择和导航。 |
+
 ## TODO 🤔
 
 目前本笔记插件还处于开发状态，还有大量没有实现的功能亟需完善。这里列出一些我认为比较重要的功能：

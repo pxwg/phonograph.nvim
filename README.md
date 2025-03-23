@@ -88,6 +88,17 @@ return {
 
 </details>
 
+## Commands 🔧
+
+| Command | Description |
+| --- | --- |
+| `:PhonographInsertPdf` | Inserts PDF reading state at cursor position. Captures current PDF page and creates a foldable bookmark. |
+| `:PhonographInsertUrl` | Inserts URL reading state at cursor position. Captures current web page and creates a foldable bookmark. |
+| `:PhonographOpen` | Opens the reading state (PDF or URL) associated with the current cursor position. |
+| `:PhonographMouseOpen` | Opens the reading state at mouse click position. Useful for quickly opening bookmarks with mouse. |
+| `:PhonographEdit` | Updates existing bookmark at cursor position with current reading state. |
+| `:PhonographReview` | Opens UI with all saved reading states, allowing selection and navigation between PDFs and URLs. |
+
 ## TODO 🤔
 
 This note-taking plugin is still under development, and there are many features that need to be completed. Here are some features I consider important:
