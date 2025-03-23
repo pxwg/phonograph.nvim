@@ -11,7 +11,7 @@ M.defalut_opts = {
   ui = {
     selection = {
       border = {
-        style = "single",
+        style = "rounded",
         text = {
           top = " Selection ",
           top_align = "center",
@@ -32,7 +32,7 @@ M.defalut_opts = {
     },
     preview = {
       border = {
-        style = "single",
+        style = "rounded",
         text = {
           top = " Details ",
           top_align = "center",
