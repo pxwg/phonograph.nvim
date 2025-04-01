@@ -6,71 +6,118 @@ local function is_website(url, pattern)
   return url:match("^https?://" .. pattern) ~= nil
 end
 
---- Get the reading state of the current tab in Chrome
---- if url == youtube, it will return the video at the proper time with it's url
---- @return string
-function M.ReturnChormeReadingState()
+-- Helper function to get current URL from Chrome
+local function get_current_url()
   local script_init = string.format([[
-        tell application "Google Chrome"
-            set currentTab to active tab of front window
-            set tabURL to URL of currentTab
-            execute currentTab javascript "(window.location.href)"
-        end tell
-    ]])
-  local result_init = vim.fn.system({ "osascript", "-e", script_init })
-  -- reading state for youtube is different: video time
-  if is_website(result_init, "youtube.com") then
-    local script_youtube = string.format(
-      [[
-    tell application "Google Chrome"
-        set currentTab to active tab of front window
-        set tabURL to URL of currentTab
-        set tabTitle to title of currentTab
-        execute currentTab javascript "
-            (function() {
-                const player = document.querySelector('.video-stream');
-                const currentTime = player ? Math.floor(player.currentTime) : 0;
-                const url = new URL(window.location.href);
-                url.searchParams.set('t', currentTime + 's');
-                return {url: url.toString(), title: document.title, scrollY: window.scrollY, tag: '%s'};
-            })()
-        "
-    end tell
-    ]],
-      tags.generateTimestampTag()
-    )
-    local result_youtube = vim.fn.system({ "osascript", "-e", script_youtube })
-    -- print(result_youtube)
-    if result_youtube then
-      result_youtube = result_youtube:gsub("%s+$", "")
-      print(result_youtube)
-      return result_youtube
-    else
-      vim.notify("phonograph.nvim: Failed to record reading state.", vim.log.levels.ERROR)
-      return ""
-    end
-  -- deal with other websites
+      tell application "Google Chrome"
+          set currentTab to active tab of front window
+          set tabURL to URL of currentTab
+          execute currentTab javascript "(window.location.href)"
+      end tell
+  ]])
+  return vim.fn.system({ "osascript", "-e", script_init })
+end
+
+-- YouTube handler
+local function handle_youtube()
+  local script_youtube = string.format(
+    [[
+  tell application "Google Chrome"
+      set currentTab to active tab of front window
+      set tabURL to URL of currentTab
+      set tabTitle to title of currentTab
+      execute currentTab javascript "
+          (function() {
+              const player = document.querySelector('.video-stream');
+              const currentTime = player ? Math.floor(player.currentTime) : 0;
+              const url = new URL(window.location.href);
+              url.searchParams.set('t', currentTime + 's');
+              return {url: url.toString(), title: document.title, scrollY: window.scrollY, tag: '%s'};
+          })()
+      "
+  end tell
+  ]],
+    tags.generateTimestampTag()
+  )
+  local result = vim.fn.system({ "osascript", "-e", script_youtube })
+  return result
+end
+
+-- Bilibili handler
+local function handle_bilibili()
+  local script_bilibili = string.format(
+    [[
+  tell application "Google Chrome"
+      set currentTab to active tab of front window
+      set tabURL to URL of currentTab
+      set tabTitle to title of currentTab
+      execute currentTab javascript "
+          (function() {
+              // Try different selectors for Bilibili video player
+              const player = document.querySelector('video.bilibili-player-video') || 
+                             document.querySelector('.bpx-player-video-wrap video') ||
+                             document.querySelector('video');
+              
+              const currentTime = player ? Math.floor(player.currentTime) : 0;
+              const urlString = window.location.href;
+              const baseUrl = urlString.split('?')[0];
+              const url = new URL(baseUrl);
+              url.searchParams.set('t', currentTime + 's');
+              return {url: url.toString(), title: document.title, scrollY: window.scrollY, tag: '%s'};
+          })()
+      "
+  end tell
+  ]],
+    tags.generateTimestampTag()
+  )
+  local result = vim.fn.system({ "osascript", "-e", script_bilibili })
+  return result
+end
+
+-- Generic website handler
+local function handle_generic_website()
+  local script = string.format(
+    [[
+      tell application "Google Chrome"
+          set currentTab to active tab of front window
+          set tabURL to URL of currentTab
+          set tabTitle to title of currentTab
+          execute currentTab javascript "({url: window.location.href, title: document.title, scrollY: window.scrollY, tag: '%s'})"
+      end tell
+  ]],
+    tags.generateTimestampTag()
+  )
+  local result = vim.fn.system({ "osascript", "-e", script })
+  return result
+end
+
+-- Process result from any handler
+local function process_result(result, site_name)
+  if result then
+    result = result:gsub("%s+$", "")
+    print(result)
+    return result
   else
-    local script = string.format(
-      [[
-        tell application "Google Chrome"
-            set currentTab to active tab of front window
-            set tabURL to URL of currentTab
-            set tabTitle to title of currentTab
-            execute currentTab javascript "({url: window.location.href, title: document.title, scrollY: window.scrollY, tag: '%s'})"
-        end tell
-    ]],
-      tags.generateTimestampTag()
-    )
-    local result = vim.fn.system({ "osascript", "-e", script })
-    if result then
-      result = result:gsub("%s+$", "")
-      print(result)
-      return result
-    else
-      print("Failed to record reading state.")
-      return ""
-    end
+    vim.notify("phonograph.nvim: Failed to record reading state for " .. site_name .. ".", vim.log.levels.ERROR)
+    return ""
+  end
+end
+
+-- Main function
+function M.ReturnChormeReadingState()
+  local current_url = get_current_url()
+
+  -- Determine website type and handle accordingly
+  local result
+  if is_website(current_url, "www.youtube.com") then
+    result = handle_youtube()
+    return process_result(result, "YouTube")
+  elseif is_website(current_url, "www.bilibili.com") then
+    result = handle_bilibili()
+    return process_result(result, "Bilibili")
+  else
+    result = handle_generic_website()
+    return process_result(result, "website")
   end
 end
 
