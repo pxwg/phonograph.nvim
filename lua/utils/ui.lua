@@ -1,6 +1,5 @@
 -- ui module for show the history of urls and pdfs
 local M = {}
-local api = require("utils.api")
 local note = require("note")
 local pdf_preview = require("preview.pdf")
 

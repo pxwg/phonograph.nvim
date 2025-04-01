@@ -8,7 +8,8 @@ local rem = require("utils.rem")
 local sel = require("utils.select")
 local ui = require("utils.ui")
 local map = vim.keymap.set
-local api = require("utils.api")
+local api_pdf = require("api.pdf_skim")
+local api_url = require("api.url_chorme")
 local data = require("utils.data")
 local paths = require("utils.path")
 local tags = require("utils.tags")
@@ -51,10 +52,10 @@ vim.api.nvim_create_user_command("PhonographOpen", function()
   end
   if line.type == "pdf" then
     vim.notify("phonograph.nvim: PDF open!", vim.log.levels.INFO)
-    api.OpenSkimToReadingState(line.pos, line.path)
+    api_pdf.OpenSkimToReadingState(line.pos, line.path)
   elseif line.type == "url" then
     vim.notify("phonograph.nvim: URL open!", vim.log.levels.INFO)
-    api.OpenUntilReady(line.path, line.pos)
+    api_url.OpenChormeToReadingState(line.path, line.pos)
   end
 end, {})
 
@@ -77,10 +78,10 @@ vim.api.nvim_create_user_command("PhonographMouseOpen", function()
   end
   if line.type == "pdf" then
     vim.notify("phonograph.nvim: PDF open!", vim.log.levels.INFO)
-    api.OpenSkimToReadingState(line.pos, line.path)
+    api_pdf.OpenSkimToReadingState(line.pos, line.path)
   elseif line.type == "url" then
     vim.notify("phonograph.nvim: URL open!", vim.log.levels.INFO)
-    api.OpenUntilReady(line.path, line.pos)
+    api_url.OpenChormeToReadingState(line.path, line.pos)
   end
 end, {})
 
@@ -97,7 +98,7 @@ vim.api.nvim_create_user_command("PhonographEdit", function()
 
   local tag = line.tag
   if line.type == "pdf" then
-    local tab = api.ReturnSkimReadingState()
+    local tab = api_pdf.ReturnSkimReadingState()
     local pdf = rem.pdf_line_to_table(tab)
     if not pdf then
       vim.notify("phonograph.nvim: No pdf", vim.log.levels.ERROR)

@@ -1,7 +1,8 @@
 -- getting and remembering the history of pdfs and urls
 -- keymappings
 local map = vim.keymap.set
-local api = require("utils.api")
+local api_chrome = require("api.url_chorme")
+local api_skim = require("api.pdf_skim")
 local data = require("utils.data")
 local paths = require("utils.path")
 local tags = require("utils.tags")
@@ -96,7 +97,7 @@ M.InsertPDFurl = {}
 
 ---@return string|nil
 function M.InsertPDFurl:pdf()
-  local pdf = api.ReturnSkimReadingState()
+  local pdf = api_skim.ReturnSkimReadingState()
   local pdf_table = M.pdf_line_to_table(pdf)
 
   local pos = vim.api.nvim_win_get_cursor(0)
@@ -134,7 +135,7 @@ end
 
 ---@return string|nil
 function M.InsertPDFurl:url()
-  local url = api.ReturnChormeReadingState()
+  local url = api_chrome.ReturnChormeReadingState()
   local url_table = M.url_line_to_table(url)
 
   local pos = vim.api.nvim_win_get_cursor(0)
@@ -220,8 +221,8 @@ end
 function M.OpenPDFAndURL()
   local info = M.ExtractAndPrintFileInfo()
   if info then
-    api.OpenSkimToReadingState(info[2], info[1])
-    api.OpenUntilReady(info[4], info[3])
+    api_skim.OpenSkimToReadingState(info[2], info[1])
+    api_chrome.OpenChormeToReadingState(info[4], info[3])
   end
 end
 

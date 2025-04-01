@@ -1,6 +1,3 @@
--- api sources for obtaining the reading state of the current tab in Chrome and Skim, and opening the document in Skim to the specified page.
--- TODO: Rewrite the file system with sqlite.lua
-
 local M = {}
 local tags = require("utils.tags")
 -- local udb = require("utils.db")
@@ -30,61 +27,10 @@ function M.ReturnChormeReadingState()
   end
 end
 
---- Get the reading state of the current tab in Skim
---- @return string|nil
-function M.ReturnSkimReadingState()
-  local script = string.format(
-    [[
-        tell application "Skim"
-            set currentDocument to front document
-            set documentPath to path of currentDocument
-            set currentPage to get index of current page of currentDocument
-            return "pos: " & currentPage & ", path: " & documentPath & ", tag:" & "%s"
-        end tell
-    ]],
-    tags.generateTimestampTag()
-  )
-  local result = vim.fn.system({ "osascript", "-e", script })
-
-  if result then
-    result = result:gsub("%s+$", "")
-    print(result)
-    return result
-  else
-    print("Failed to record reading state.")
-    return nil
-  end
-end
-
---- Open the document in Skim to the specified page
---- @param page number
---- @param path string
-function M.OpenSkimToReadingState(page, path)
-  local script = string.format(
-    [[
-        tell application "Skim"
-            open POSIX file "%s"
-            tell front document
-                go to page %s
-            end tell
-        end tell
-    ]],
-    path,
-    page
-  )
-  local result = vim.fn.system({ "osascript", "-e", script })
-
-  if result then
-    print("Opened document to specified page.")
-  else
-    print("Failed to open document.")
-  end
-end
-
 --- Go to the URL and scroll to the position when the page is loaded
 --- @param url string
 --- @param scrollY number
-function M.OpenUntilReady(url, scrollY)
+function M.OpenChormeToReadingState(url, scrollY)
   url = url:gsub("%s+", "")
   scrollY = scrollY or 0
 
