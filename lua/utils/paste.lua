@@ -6,8 +6,9 @@ local M = {}
 
 local original_paste = vim.paste
 
+-- TODO: configurable filetype
 vim.paste = function(lines, phase)
-  if phase == -1 then
+  if phase == -1 and vim.bo.filetype == "markdown" then
     local file_path = lines[1]
     if file_path:match("%.pdf$") then
       local file_name = vim.fn.fnamemodify(file_path, ":t")
