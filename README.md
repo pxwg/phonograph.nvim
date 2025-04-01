@@ -11,6 +11,7 @@ When we transcribe these handwritten notes, or poetically speaking—"flowing te
 * Recording the current reading state, which currently includes:
   * The URL of the current web page being read and the reading position
   * The filename of the current PDF being read and the reading position
+  * The specific time of the current video being watched 
   The reading state is reflected in the text as folded bookmarks, marking the relationship between annotations and the web page being read.
 
 * Restoring the reading state when reopening Neovim, possible methods include:
