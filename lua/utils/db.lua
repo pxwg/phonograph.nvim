@@ -16,7 +16,7 @@ local M = {}
 ---@field type string the type of original object (e.g. "pdf", "url")
 ---@field tag number the unique tag of the entry
 
----@type CustomEntryTable
+---@class CustomEntryTable
 local custom_entries = tbl("custom_entries", {
   id = true, -- primary key
   path = { "text", required = true },
@@ -46,7 +46,6 @@ end
 
 --- Function to get entries by tag
 ---@param tag number
----@return table
 function custom_entries:get_by_tag(tag)
   return custom_entries:where({ tag = tag })
 end
