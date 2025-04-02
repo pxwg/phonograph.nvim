@@ -5,6 +5,8 @@ local pdf_preview = require("preview.pdf")
 
 local Layout = require("nui.layout")
 local Popup = require("nui.popup")
+local api_pdf = require("api.pdf_skim")
+local api_url = require("api.url_chorme")
 local keymap = vim.keymap
 
 local icons = require("icons").icons
@@ -172,9 +174,9 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
   keymap.set("n", "<CR>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
     if get_type(tables[current_index]) == "pdf" then
-      api.OpenSkimToReadingState(tables[current_index][row].pos, tables[current_index][row].path)
+      api_pdf.OpenSkimToReadingState(tables[current_index][row].pos, tables[current_index][row].path)
     else
-      api.OpenUntilReady(tables[current_index][row].path, tables[current_index][row].pos)
+      api_url.OpenChormeToReadingState(tables[current_index][row].path, tables[current_index][row].pos)
     end
     vim.schedule(function()
       local width = vim.api.nvim_win_get_width(detail_popup.winid)
@@ -190,9 +192,9 @@ local function set_keymaps(main_popup, detail_popup, layout, tables, _update_mai
   keymap.set("n", "<C-y>", function()
     local row = vim.api.nvim_win_get_cursor(0)[1]
     if get_type(tables[current_index]) == "pdf" then
-      api.OpenSkimToReadingState(tables[current_index][row].page, tables[current_index][row].path)
+      api_pdf.OpenSkimToReadingState(tables[current_index][row].page, tables[current_index][row].path)
     else
-      api.OpenUntilReady(tables[current_index][row].url, tables[current_index][row].scroll)
+      api_url.OpenChormeToReadingState(tables[current_index][row].url, tables[current_index][row].scroll)
     end
     vim.schedule(function()
       local width = vim.api.nvim_win_get_width(detail_popup.winid)
