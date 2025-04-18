@@ -19,10 +19,11 @@ end
 --- @return string The uncommented string
 local function uncomment_string(commented_string)
   --- FIX: hard-coded comment string for html comment in markdown
-  if commented_string:match("^<!%-%-") and commented_string:match("%-%->$") then
-    local uncommented = commented_string:gsub("^<!%-%-", ""):gsub("%-%->$", "")
+  if commented_string:match("^%s*<!%-%-") and commented_string:match("%-%->%s*$") then
+    local leading_space = commented_string:match("^(%s*)")
+    local uncommented = commented_string:gsub("^%s*<!%-%-", ""):gsub("%-%->%s*$", "")
     uncommented = uncommented:gsub("^%s+", ""):gsub("%s+$", "")
-    return uncommented
+    return leading_space .. uncommented
   end
 
   local commentstring = get_comment_string()
@@ -31,9 +32,10 @@ local function uncomment_string(commented_string)
   end
 
   local escaped_commentstring = commentstring:gsub("%%", "%%%%"):gsub("%s", "%%s")
-  local uncommented = commented_string:gsub("^" .. escaped_commentstring:format(""), "")
+  local leading_space = commented_string:match("^(%s*)")
+  local uncommented = commented_string:gsub("^%s*" .. escaped_commentstring:format(""), "")
   uncommented = uncommented:gsub("^%s+", "")
-  return uncommented
+  return leading_space .. uncommented
 end
 
 M.uncomment_string = uncomment_string
